@@ -51,8 +51,13 @@ static constexpr uint8_t RAR5_SIGNATURE_XOR[8] = {
 };
 
 inline void get_rar5_signature(uint8_t out[8]) {
+    // Read the mask through volatile so the real signature is not a
+    // compile-time constant sitting inside the executable. An SFX stub is a
+    // copy of this binary, and a baked-in signature would be cut as if it
+    // were an appended archive.
+    volatile uint8_t mask = 0xA1;
     for (int i = 0; i < 8; ++i) {
-        out[i] = static_cast<uint8_t>(RAR5_SIGNATURE_XOR[i] ^ 0xA1);
+        out[i] = static_cast<uint8_t>(RAR5_SIGNATURE_XOR[i] ^ mask);
     }
 }
 
@@ -63,8 +68,9 @@ static constexpr uint8_t RAR4_SIGNATURE_XOR[7] = {
 };
 
 inline void get_rar4_signature(uint8_t out[7]) {
+    volatile uint8_t mask = 0xA1;
     for (int i = 0; i < 7; ++i) {
-        out[i] = static_cast<uint8_t>(RAR4_SIGNATURE_XOR[i] ^ 0xA1);
+        out[i] = static_cast<uint8_t>(RAR4_SIGNATURE_XOR[i] ^ mask);
     }
 }
 

@@ -8,8 +8,10 @@
  */
 
 #include "rar_archive.h"
+#include "rar_i18n.h"
 #include <algorithm>
 #include <chrono>
+#include <cstdio>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -166,37 +168,83 @@ static std::vector<uint8_t> build_possibly_encrypted_block(
     return out;
 }
 
+// A RAR 5 header stores CRC32 as 4 raw little-endian bytes, then a vint size
+// and a vint type. Used to ignore accidental 8-byte signature matches.
+static bool rar5_block_follows(const uint8_t* data, size_t len, size_t sig_pos, uint64_t* htype_out) {
+    if (sig_pos + 12 > len) return false;
+    size_t off = sig_pos + 8 + 4;
+    uint64_t hsize = 0;
+    uint64_t htype = 0;
+    if (!read_vint(data, len, off, hsize)) return false;
+    if (hsize < 2 || hsize > (1024ULL * 1024ULL)) return false;
+    if (off + static_cast<size_t>(hsize) > len) return false;
+    if (!read_vint(data, len, off, htype)) return false;
+    if (htype > HEAD5_ENDARC) return false;
+    if (htype_out) *htype_out = htype;
+    return true;
+}
+
 // ============================================================================
 // Multi-Volume Filename Helper
 // ============================================================================
 
-static std::string make_volume_filename(const std::string& base_path, size_t vol_index_1based) {
-    std::string p = base_path;
-    std::string ext = ".rar";
-    if (p.size() >= 4) {
-        std::string tail = p.substr(p.size() - 4);
-        std::string tail_low = tail;
-        for (char& c : tail_low) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-        if (tail_low == ".rar") {
-            ext = tail;
-            p = p.substr(0, p.size() - 4);
-        }
+static std::string strip_volume_suffix(std::string p) {
+    auto lower_tail = [](const std::string& s, size_t n) {
+        if (s.size() < n) return std::string();
+        std::string t = s.substr(s.size() - n);
+        for (char& c : t) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        return t;
+    };
+    std::string tail4 = lower_tail(p, 4);
+    if (tail4 == ".rar" || tail4 == ".exe" || tail4 == ".sfx") {
+        p = p.substr(0, p.size() - 4);
     }
-    // Check if p already ends with .partN
+    // name.partN
     size_t dot_pos = p.rfind(".part");
     if (dot_pos != std::string::npos) {
         bool all_digits = (dot_pos + 5 < p.size());
         for (size_t i = dot_pos + 5; i < p.size(); ++i) {
-            if (!std::isdigit(static_cast<unsigned char>(p[i]))) {
-                all_digits = false;
-                break;
-            }
+            if (!std::isdigit(static_cast<unsigned char>(p[i]))) all_digits = false;
         }
-        if (all_digits) {
-            p = p.substr(0, dot_pos);
+        if (all_digits && dot_pos + 5 < p.size()) p = p.substr(0, dot_pos);
+    }
+    // old style name.rNN
+    if (p.size() >= 4 && p[p.size() - 4] == '.' && (p[p.size() - 3] == 'r' || p[p.size() - 3] == 'R') &&
+        std::isdigit(static_cast<unsigned char>(p[p.size() - 2])) &&
+        std::isdigit(static_cast<unsigned char>(p[p.size() - 1]))) {
+        p = p.substr(0, p.size() - 4);
+    }
+    return p;
+}
+
+std::string make_volume_name(const std::string& base_path, size_t index_1based, bool old_style) {
+    std::string stem = strip_volume_suffix(base_path);
+    if (index_1based == 0) index_1based = 1;
+    if (old_style) {
+        if (index_1based == 1) return stem + ".rar";
+        char buf[16];
+        std::snprintf(buf, sizeof(buf), ".r%02u", (unsigned)(index_1based - 2));
+        return stem + buf;
+    }
+    return stem + ".part" + std::to_string(index_1based) + ".rar";
+}
+
+std::string locate_first_volume(const std::string& any_path) {
+    std::string stem = strip_volume_suffix(any_path);
+    std::string part1 = stem + ".part1.rar";
+    std::string old1 = stem + ".rar";
+    if (fs::exists(u8_to_path(part1))) return part1;
+    if (fs::exists(u8_to_path(old1)) && old1 != any_path) {
+        // Only rewind when the given path looks like a later old-style volume.
+        std::string low = any_path;
+        for (char& c : low) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        if (low.size() >= 4 && low[low.size() - 4] == '.' && low[low.size() - 3] == 'r' &&
+            std::isdigit(static_cast<unsigned char>(low[low.size() - 2]))) {
+            return old1;
         }
     }
-    return p + ".part" + std::to_string(vol_index_1based) + ext;
+    if (fs::exists(u8_to_path(part1))) return part1;
+    return any_path;
 }
 
 // ============================================================================
@@ -214,9 +262,11 @@ RarExitCode RarArchive::load(const std::string& path, const std::string& passwor
     entries.clear();
     recovery_data.clear();
 
+    const std::string start_path = locate_first_volume(path);
+
     // Check if this is part of a multi-volume set
     std::vector<std::string> vol_paths;
-    vol_paths.push_back(path);
+    vol_paths.push_back(start_path);
 
     uint8_t sig5[8];
     get_rar5_signature(sig5);
@@ -229,27 +279,29 @@ RarExitCode RarArchive::load(const std::string& path, const std::string& passwor
     for (size_t v_idx = 0; v_idx < vol_paths.size(); ++v_idx) {
         std::vector<uint8_t> raw;
         if (!read_file_bytes(vol_paths[v_idx], raw)) {
-            if (err_msg) *err_msg = "无法打开 " + vol_paths[v_idx];
+            if (err_msg) *err_msg = msgf("arc.cannot_open", vol_paths[v_idx]);
             return RAR_EXIT_OPEN_ERROR;
         }
 
-        // Locate RAR5 signature (allowing up to 1MB SFX module prefix)
+        // Locate a RAR5 signature that is followed by a real header.
+        // A bare 8-byte match inside an SFX stub is ignored.
         size_t sig_pos = std::string::npos;
-        size_t search_limit = std::min<size_t>(raw.size(), 1024 * 1024);
         if (raw.size() >= 8) {
-            for (size_t i = 0; i + 8 <= search_limit; ++i) {
-                if (std::memcmp(raw.data() + i, sig5, 8) == 0) {
-                    sig_pos = i;
-                    break;
-                }
+            for (size_t i = 0; i + 8 <= raw.size(); ++i) {
+                if (std::memcmp(raw.data() + i, sig5, 8) != 0) continue;
+                uint64_t htype = 0;
+                if (!rar5_block_follows(raw.data(), raw.size(), i, &htype)) continue;
+                if (htype != HEAD5_MAIN && htype != HEAD5_CRYPT) continue;
+                sig_pos = i;
+                break;
             }
         }
         if (sig_pos == std::string::npos) {
             // Check RAR 4.x signature for clearer error message
             if (raw.size() >= 7 && std::memcmp(raw.data(), sig4, 7) == 0) {
-                if (err_msg) *err_msg = "不支持旧版 RAR 4.x 格式，仅支持 RAR 5.0 格式";
+                if (err_msg) *err_msg = msg("arc.rar4");
             } else {
-                if (err_msg) *err_msg = vol_paths[v_idx] + " 不是 RAR 压缩文件";
+                if (err_msg) *err_msg = msgf("arc.not_rar", vol_paths[v_idx]);
             }
             return RAR_EXIT_FATAL;
         }
@@ -276,13 +328,13 @@ RarExitCode RarArchive::load(const std::string& path, const std::string& passwor
                 size_t tmp_off = 4;
                 uint64_t raw_hsize = 0;
                 if (!read_vint(first_blk.data(), first_blk.size(), tmp_off, raw_hsize)) {
-                    if (err_msg) *err_msg = "加密文件头损坏或密码错误";
+                    if (err_msg) *err_msg = msg("arc.bad_enc_hdr");
                     return RAR_EXIT_BAD_PASSWORD;
                 }
                 size_t total_hdr_plain = tmp_off + static_cast<size_t>(raw_hsize);
                 size_t total_hdr_aligned = (total_hdr_plain + 15) & ~size_t(15);
                 if (pos + total_hdr_aligned > raw.size()) {
-                    if (err_msg) *err_msg = "加密文件头截断";
+                    if (err_msg) *err_msg = msg("arc.trunc_enc");
                     return RAR_EXIT_FATAL;
                 }
                 dec_hdr_buf = aes256_cbc_decrypt(raw.data() + pos, total_hdr_aligned, hdr_keys.aes_key, iv);
@@ -299,18 +351,18 @@ RarExitCode RarArchive::load(const std::string& path, const std::string& passwor
             size_t h_off = 4;
             uint64_t hdr_size = 0;
             if (!read_vint(blk_ptr, blk_avail, h_off, hdr_size)) {
-                if (err_msg) *err_msg = "文件头大小解析失败";
+                if (err_msg) *err_msg = msg("arc.bad_hdr_size");
                 return RAR_EXIT_CRC_ERROR;
             }
             size_t hdr_size_vint_len = h_off - 4;
             if (h_off + hdr_size > blk_avail) {
-                if (err_msg) *err_msg = "压缩文件意外结束";
+                if (err_msg) *err_msg = msg("arc.unexpected_end");
                 return RAR_EXIT_FATAL;
             }
 
             uint32_t calc_crc = crc32_compute(blk_ptr + 4, hdr_size_vint_len + static_cast<size_t>(hdr_size));
             if (calc_crc != expected_crc) {
-                if (err_msg) *err_msg = "文件头校验和 (CRC32) 错误";
+                if (err_msg) *err_msg = msg("arc.bad_hdr_crc");
                 return vol_headers_encrypted ? RAR_EXIT_BAD_PASSWORD : RAR_EXIT_CRC_ERROR;
             }
 
@@ -353,12 +405,12 @@ RarExitCode RarArchive::load(const std::string& path, const std::string& passwor
                     h_off += 12;
                 }
                 if (password.empty()) {
-                    if (err_msg) *err_msg = "加密的压缩文件头需要密码 (-p<密码> 或 -hp<密码>)";
+                    if (err_msg) *err_msg = msg("arc.need_password");
                     return RAR_EXIT_BAD_PASSWORD;
                 }
                 hdr_keys = derive_rar5_keys(password, hdr_salt, hdr_kdf_count);
                 if ((enc_flags & CFL5_PSWCHECK) && !verify_rar5_password(hdr_keys, hdr_check)) {
-                    if (err_msg) *err_msg = "密码错误";
+                    if (err_msg) *err_msg = msg("arc.bad_password");
                     return RAR_EXIT_BAD_PASSWORD;
                 }
                 headers_encrypted = true;
@@ -509,13 +561,37 @@ RarExitCode RarArchive::load(const std::string& path, const std::string& passwor
                             entry.redir_flags = rflags;
                             entry.redir_target.assign(reinterpret_cast<const char*>(blk_ptr + e_off), static_cast<size_t>(rlen));
                         }
+                    } else if (rec_type == FEXT5_UOWNER) {
+                        uint64_t oflags = 0;
+                        if (read_vint(blk_ptr, rec_end, e_off, oflags)) {
+                            entry.has_owner = true;
+                            if (oflags & 0x01) {
+                                uint64_t nlen = 0;
+                                if (read_vint(blk_ptr, rec_end, e_off, nlen) && e_off + nlen <= rec_end) {
+                                    entry.owner_user.assign(reinterpret_cast<const char*>(blk_ptr + e_off), static_cast<size_t>(nlen));
+                                    e_off += static_cast<size_t>(nlen);
+                                }
+                            }
+                            if (oflags & 0x02) {
+                                uint64_t nlen = 0;
+                                if (read_vint(blk_ptr, rec_end, e_off, nlen) && e_off + nlen <= rec_end) {
+                                    entry.owner_group.assign(reinterpret_cast<const char*>(blk_ptr + e_off), static_cast<size_t>(nlen));
+                                    e_off += static_cast<size_t>(nlen);
+                                }
+                            }
+                            uint64_t uid = 0, gid = 0;
+                            if (oflags & 0x04) read_vint(blk_ptr, rec_end, e_off, uid);
+                            if (oflags & 0x08) read_vint(blk_ptr, rec_end, e_off, gid);
+                            entry.owner_uid = (uint32_t)uid;
+                            entry.owner_gid = (uint32_t)gid;
+                        }
                     }
                     e_off = rec_end;
                 }
 
                 // Read data area
                 if (pos + data_size > raw.size()) {
-                    if (err_msg) *err_msg = "文件数据区域超出压缩包大小";
+                    if (err_msg) *err_msg = msg("arc.data_oob");
                     return RAR_EXIT_FATAL;
                 }
                 std::vector<uint8_t> chunk(raw.begin() + pos, raw.begin() + pos + static_cast<size_t>(data_size));
@@ -565,11 +641,14 @@ RarExitCode RarArchive::load(const std::string& path, const std::string& passwor
                 uint64_t eflags = 0;
                 read_vint(blk_ptr, body_end, h_off, eflags);
                 if ((eflags & EARC5_NEXT_VOLUME) && v_idx + 1 == vol_paths.size()) {
-                    std::string next_vol = make_volume_filename(path, v_idx + 2);
+                    std::string next_vol = make_volume_name(start_path, v_idx + 2, false);
+                    if (!fs::exists(u8_to_path(next_vol))) {
+                        next_vol = make_volume_name(start_path, v_idx + 2, true);
+                    }
                     if (fs::exists(u8_to_path(next_vol))) {
                         vol_paths.push_back(next_vol);
                     } else {
-                        if (err_msg) *err_msg = "找不到下一分卷: " + next_vol;
+                        if (err_msg) *err_msg = msgf("arc.missing_vol", next_vol);
                         return RAR_EXIT_OPEN_ERROR;
                     }
                 }
@@ -591,13 +670,14 @@ RarExitCode RarArchive::load(const std::string& path, const std::string& passwor
 // RarArchive::add_entry_from_memory Implementation
 // ============================================================================
 
-bool RarArchive::add_entry_from_memory(const std::string& internal_name,
-                                       const uint8_t* raw_data, size_t raw_len,
-                                       bool is_dir, uint64_t attributes,
-                                       uint64_t mtime_winft, uint64_t ctime_winft, uint64_t atime_winft,
-                                       const RarArchiveOptions& opts,
-                                       Rar5Compressor& compressor,
-                                       bool solid_continuation) {
+RarFileEntry RarArchive::build_entry_from_memory(const std::string& internal_name,
+                                                   const uint8_t* raw_data, size_t raw_len,
+                                                   bool is_dir, uint64_t attributes,
+                                                   uint64_t mtime_winft, uint64_t ctime_winft, uint64_t atime_winft,
+                                                   const RarArchiveOptions& opts,
+                                                   Rar5Compressor& compressor,
+                                                   bool solid_continuation,
+                                                   const RarEntryExtra* extra) const {
     RarFileEntry entry{};
     entry.name = internal_name;
     // Normalize backslashes to forward slashes as required by RAR 5.0 spec
@@ -607,7 +687,21 @@ bool RarArchive::add_entry_from_memory(const std::string& internal_name,
     entry.is_dir = is_dir;
     entry.unpacked_size = is_dir ? 0 : raw_len;
     entry.attributes = attributes;
+#if defined(_WIN32)
     entry.host_os = HOST5_WINDOWS;
+#else
+    entry.host_os = HOST5_UNIX;
+#endif
+    if (extra) {
+        if (extra->host_os_set) entry.host_os = extra->host_os;
+        entry.redir_type = extra->redir_type;
+        entry.redir_target = extra->redir_target;
+        entry.has_owner = extra->has_owner;
+        entry.owner_user = extra->owner_user;
+        entry.owner_group = extra->owner_group;
+        entry.owner_uid = extra->owner_uid;
+        entry.owner_gid = extra->owner_gid;
+    }
     entry.mtime_winft = (mtime_winft != 0) ? mtime_winft : current_win_filetime();
     entry.ctime_winft = ctime_winft;
     entry.atime_winft = atime_winft;
@@ -688,8 +782,10 @@ bool RarArchive::add_entry_from_memory(const std::string& internal_name,
         entry.packed_data = std::move(comp_bytes);
     }
     entry.packed_size = entry.packed_data.size();
+    return entry;
+}
 
-    // Replace existing entry with same name or append
+bool RarArchive::commit_entry(RarFileEntry entry) {
     for (auto& existing : entries) {
         if (existing.name == entry.name && !entry.has_version) {
             existing = std::move(entry);
@@ -698,6 +794,19 @@ bool RarArchive::add_entry_from_memory(const std::string& internal_name,
     }
     entries.push_back(std::move(entry));
     return true;
+}
+
+bool RarArchive::add_entry_from_memory(const std::string& internal_name,
+                                       const uint8_t* raw_data, size_t raw_len,
+                                       bool is_dir, uint64_t attributes,
+                                       uint64_t mtime_winft, uint64_t ctime_winft, uint64_t atime_winft,
+                                       const RarArchiveOptions& opts,
+                                       Rar5Compressor& compressor,
+                                       bool solid_continuation,
+                                       const RarEntryExtra* extra) {
+    return commit_entry(build_entry_from_memory(internal_name, raw_data, raw_len, is_dir, attributes,
+                                                mtime_winft, ctime_winft, atime_winft, opts, compressor,
+                                                solid_continuation, extra));
 }
 
 // ============================================================================
@@ -722,12 +831,12 @@ RarExitCode RarArchive::extract_entry(size_t index, const std::string& password,
 
     if (entry.encrypted) {
         if (password.empty()) {
-            if (err_msg) *err_msg = "加密文件需要密码: " + entry.name;
+            if (err_msg) *err_msg = msgf("arc.need_file_password", entry.name);
             return RAR_EXIT_BAD_PASSWORD;
         }
         keys = derive_rar5_keys(password, entry.salt, entry.kdf_count);
         if ((entry.crypt_flags & CFL5_PSWCHECK) && !verify_rar5_password(keys, entry.check_value)) {
-            if (err_msg) *err_msg = "密码错误: " + entry.name;
+            if (err_msg) *err_msg = msgf("arc.bad_file_password", entry.name);
             return RAR_EXIT_BAD_PASSWORD;
         }
         decrypted_buf = aes256_cbc_decrypt(comp_ptr, comp_len, keys.aes_key, entry.iv);
@@ -738,7 +847,7 @@ RarExitCode RarArchive::extract_entry(size_t index, const std::string& password,
     size_t dict_size = (size_t(128 * 1024) << entry.dict_bits);
     if (!decompressor.decompress(comp_ptr, comp_len, entry.unpacked_size,
                                  entry.comp_method, dict_size, entry.solid, out_data)) {
-        if (err_msg) *err_msg = "解压数据流损坏: " + entry.name;
+        if (err_msg) *err_msg = msgf("arc.bad_stream", entry.name);
         return entry.encrypted ? RAR_EXIT_BAD_PASSWORD : RAR_EXIT_CRC_ERROR;
     }
 
@@ -749,7 +858,7 @@ RarExitCode RarArchive::extract_entry(size_t index, const std::string& password,
             calc_crc = tweak_rar5_crc32(calc_crc, keys.hash_key);
         }
         if (calc_crc != entry.crc32) {
-            if (err_msg) *err_msg = "校验和错误 (CRC32 不匹配): " + entry.name;
+            if (err_msg) *err_msg = msgf("arc.crc", entry.name);
             return RAR_EXIT_CRC_ERROR;
         }
     }
@@ -764,7 +873,7 @@ RarExitCode RarArchive::extract_entry(size_t index, const std::string& password,
             std::memcpy(calc_b2, tw_b2, 32);
         }
         if (std::memcmp(calc_b2, entry.blake2sp, 32) != 0) {
-            if (err_msg) *err_msg = "校验和错误 (BLAKE2sp 不匹配): " + entry.name;
+            if (err_msg) *err_msg = msgf("arc.blake", entry.name);
             return RAR_EXIT_CRC_ERROR;
         }
     }
@@ -865,6 +974,29 @@ static std::vector<uint8_t> build_file_header_parts(const RarFileEntry& entry, c
         extra_out.insert(extra_out.end(), rrec.begin(), rrec.end());
     }
 
+    // Extra 6: Unix owner record (FEXT5_UOWNER = 0x06)
+    if (entry.has_owner && (entry.host_os == HOST5_UNIX || !entry.owner_user.empty() || !entry.owner_group.empty())) {
+        std::vector<uint8_t> orec;
+        write_vint(orec, FEXT5_UOWNER);
+        uint64_t oflags = 0;
+        if (!entry.owner_user.empty()) oflags |= 0x01;
+        if (!entry.owner_group.empty()) oflags |= 0x02;
+        oflags |= 0x04 | 0x08;
+        write_vint(orec, oflags);
+        if (oflags & 0x01) {
+            write_vint(orec, entry.owner_user.size());
+            orec.insert(orec.end(), entry.owner_user.begin(), entry.owner_user.end());
+        }
+        if (oflags & 0x02) {
+            write_vint(orec, entry.owner_group.size());
+            orec.insert(orec.end(), entry.owner_group.begin(), entry.owner_group.end());
+        }
+        write_vint(orec, entry.owner_uid);
+        write_vint(orec, entry.owner_gid);
+        write_vint(extra_out, orec.size());
+        extra_out.insert(extra_out.end(), orec.begin(), orec.end());
+    }
+
     return {};
 }
 
@@ -916,7 +1048,7 @@ RarExitCode RarArchive::save(const std::string& path, const RarArchiveOptions& o
 
     auto make_endarc_header = [&](bool more_volumes) -> std::vector<uint8_t> {
         std::vector<uint8_t> ebody;
-        write_vint(ebody, more_volumes ? EARC5_NEXT_VOLUME : 0);
+        write_vint(ebody, more_volumes ? static_cast<uint64_t>(EARC5_NEXT_VOLUME) : 0);
         return build_possibly_encrypted_block(enc_hdr, hdr_keys.aes_key, HEAD5_ENDARC,
                                               HFL5_SKIP_IF_UNKNOWN, ebody);
     };
@@ -1007,11 +1139,17 @@ RarExitCode RarArchive::save(const std::string& path, const RarArchiveOptions& o
             out.insert(out.end(), rblk.begin(), rblk.end());
         }
 
-        auto end_blk = make_endarc_header(false);
-        out.insert(out.end(), end_blk.begin(), end_blk.end());
+        if (!opts.omit_endarc) {
+            auto end_blk = make_endarc_header(false);
+            out.insert(out.end(), end_blk.begin(), end_blk.end());
+        }
 
+        if (before_volume && !before_volume(path)) {
+            if (err_msg) *err_msg = msgf("arc.write", path);
+            return RAR_EXIT_USER_BREAK;
+        }
         if (!write_file_bytes(path, out.data(), out.size())) {
-            if (err_msg) *err_msg = "无法写入压缩文件 " + path;
+            if (err_msg) *err_msg = msgf("arc.write", path);
             return RAR_EXIT_WRITE_ERROR;
         }
         if (created_volumes) created_volumes->push_back(path);
@@ -1039,11 +1177,17 @@ RarExitCode RarArchive::save(const std::string& path, const RarArchiveOptions& o
     };
 
     auto flush_volume = [&](bool has_more) -> bool {
-        auto end_blk = make_endarc_header(has_more);
-        cur_vol.insert(cur_vol.end(), end_blk.begin(), end_blk.end());
-        std::string vname = make_volume_filename(path, vol_idx + 1);
+        if (!(opts.omit_endarc && !has_more)) {
+            auto end_blk = make_endarc_header(has_more);
+            cur_vol.insert(cur_vol.end(), end_blk.begin(), end_blk.end());
+        }
+        std::string vname = make_volume_name(path, vol_idx + 1, opts.old_volume_names);
+        if (before_volume && !before_volume(vname)) {
+            if (err_msg) *err_msg = msgf("arc.write_vol", vname);
+            return false;
+        }
         if (!write_file_bytes(vname, cur_vol.data(), cur_vol.size())) {
-            if (err_msg) *err_msg = "无法写入分卷 " + vname;
+            if (err_msg) *err_msg = msgf("arc.write_vol", vname);
             return false;
         }
         if (created_volumes) created_volumes->push_back(vname);
@@ -1202,11 +1346,13 @@ std::vector<uint8_t> RarArchive::create_default_sfx_stub(const std::string& self
         // Strip any existing appended RAR5 archive from self_exe_path
         uint8_t sig5[8];
         get_rar5_signature(sig5);
-        for (size_t i = 4096; i + 8 <= stub.size(); i += 16) {
-            if (std::memcmp(stub.data() + i, sig5, 8) == 0) {
-                stub.resize(i);
-                break;
-            }
+        for (size_t i = 0; i + 8 <= stub.size(); ++i) {
+            if (std::memcmp(stub.data() + i, sig5, 8) != 0) continue;
+            uint64_t htype = 0;
+            if (!rar5_block_follows(stub.data(), stub.size(), i, &htype)) continue;
+            if (htype != HEAD5_MAIN && htype != HEAD5_CRYPT) continue;
+            stub.resize(i);
+            break;
         }
         return stub;
     }

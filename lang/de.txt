@@ -1,0 +1,121 @@
+# OpenRAR Deutsche Oberfläche. key<TAB>Wert, Zeilenumbruch als \n.
+banner.title	RAR 7.01 x64 (OpenRAR Clean-Room GPLv3+)
+help.body	Aufruf:   rar <Befehl> -<Schalter 1> -<Schalter N> <Archiv> <Dateien...>\n               <@Listendateien...> <Entpackpfad/>\n\n<Befehle>\n  a             Dateien zum Archiv hinzufügen\n  c             Archivkommentar hinzufügen\n  ch            Archivparameter ändern\n  cw            Archivkommentar in eine Datei schreiben\n  d             Dateien aus dem Archiv löschen\n  e             Dateien ohne Archivpfade entpacken\n  f             Dateien im Archiv auffrischen\n  i[par]=<str>  Zeichenkette in Archiven suchen\n  k             Archiv sperren\n  l[t[a],b]     Archivinhalt auflisten [technisch[alles], knapp]\n  m[f]          Ins Archiv verschieben [nur Dateien]\n  p             Datei auf die Standardausgabe schreiben\n  r             Archiv reparieren\n  rc            Fehlende Volumen wiederherstellen\n  rn            Dateien im Archiv umbenennen\n  rr[N]         Wiederherstellungsdaten hinzufügen\n  rv[N]         Wiederherstellungsvolumen erzeugen\n  s[name|-]     Archiv in SFX umwandeln oder zurück\n  t             Archivdateien prüfen\n  u             Dateien im Archiv aktualisieren\n  v[t[a],b]     Archivinhalt ausführlich auflisten\n  x             Dateien mit vollständigem Pfad entpacken\n\n<Schalter>\n  -             Schaltersuche beenden\n  -?            Hilfe anzeigen\n  -@[+]         Dateilisten aus [ein]\n  -ac           Archiv-Attribut nach dem Packen oder Entpacken löschen\n  -ad[1,2]      Archivnamen an den Zielpfad anhängen\n  -ag[format]   Archivnamen aus dem aktuellen Datum erzeugen\n  -ai           Dateiattribute ignorieren\n  -ao           Nur Dateien mit gesetztem Archiv-Attribut hinzufügen\n  -ap<path>     Pfad innerhalb des Archivs setzen\n  -as           Archivinhalt abgleichen\n  -c-           Kommentaranzeige ausschalten\n  -cfg-         Konfigurationsdatei und die Variable RAR ignorieren\n  -cl           Namen in Kleinbuchstaben umwandeln\n  -cu           Namen in Großbuchstaben umwandeln\n  -df           Dateien nach dem Archivieren löschen\n  -dh           Freigegebene Dateien öffnen\n  -dr           Dateien nach dem Archivieren in den Papierkorb legen\n  -ds           Namenssortierung für solide Archive ausschalten\n  -dw           Dateien nach dem Archivieren überschreiben und löschen\n  -ed           Leere Verzeichnisse nicht hinzufügen\n  -en           Keinen Archiv-Ende-Block schreiben\n  -ep           Pfade aus den Namen ausschließen\n  -ep1          Basisverzeichnis aus den Namen ausschließen\n  -ep2          Pfade vollständig ausdehnen\n  -ep3          Pfade einschließlich Laufwerk vollständig ausdehnen\n  -ep4<path>    Pfadpräfix aus den Namen ausschließen\n  -f            Dateien auffrischen\n  -hp[password] Dateidaten und Kopfdaten verschlüsseln\n  -ht[b|c]      Prüfsumme wählen [BLAKE2sp|CRC32]\n  -id[c,d,n,p,q] Meldungen abschalten\n  -ieml[.][addr] Ein E-Mail-Programm für das fertige Archiv öffnen\n  -ierr         Alle Meldungen auf die Standardfehlerausgabe\n  -ilog[name]   Fehler in eine Datei schreiben\n  -inul         Alle Meldungen abschalten\n  -ioff[n]      PC danach ausschalten (1 Halt, 2 Ruhezustand, 3 Schlaf, 4 Neustart)\n  -isnd         Ton einschalten\n  -iver         Versionsnummer anzeigen\n  -k            Archiv sperren\n  -kb           Beschädigte entpackte Dateien behalten\n  -log[=name]   Namen in eine Protokolldatei schreiben\n  -m<0..5>      Komprimierung (0-speichern...3-Standard...5-maximal)\n  -ma[4|5]      Archivformatversion (nur 5)\n  -mc<par>      Erweiterte Komprimierungsparameter\n  -md<n>[k,m,g] Wörterbuchgröße\n  -ms[ext;ext]  Dateitypen, die nur gespeichert werden\n  -mt<threads>  Anzahl der Threads\n  -n<file>      Zusätzliche Einschlussfilter\n  -n@           Weitere Filtermasken von der Standardeingabe lesen\n  -n@<list>     Weitere Filtermasken aus einer Listendatei lesen\n  -o[+|-]       Überschreibmodus setzen\n  -oc           NTFS-Komprimierung setzen\n  -oh           Harte Links als Verknüpfung speichern\n  -ol           Symbolische Links als Verknüpfung speichern\n  -oni          Möglicherweise inkompatible Namen erlauben\n  -op<path>     Ausgabepfad für entpackte Dateien\n  -or           Dateien automatisch umbenennen\n  -ow           Besitzer und Gruppe speichern oder wiederherstellen\n  -p[password]  Passwort setzen (leeres -p fragt am Terminal)\n  -qo[-|+]      Informationen für schnelles Öffnen\n  -r            Unterverzeichnisse einbeziehen\n  -r-           Rekursion ausschalten\n  -r0           Unterverzeichnisse nur für Platzhalternamen\n  -ri<p>[:<s>]  Priorität (0..15) und Pause in Millisekunden\n  -rr[N]        Wiederherstellungsdaten hinzufügen\n  -rv[N]        Wiederherstellungsvolumen erzeugen\n  -s[<N>,v[-],e] Solides Archiv erzeugen\n  -s-           Solides Archiv ausschalten\n  -sc<chr>[obj] Zeichensatz (u, a, o) und Objekte (f, l, c)\n  -sfx[name]    SFX-Archiv erzeugen\n  -si[name]     Daten von der Standardeingabe lesen\n  -sl<size>     Dateien kleiner als die angegebene Größe\n  -sm<size>     Dateien größer als die angegebene Größe\n  -t            Dateien nach dem Archivieren prüfen\n  -ta<date>     Dateien geändert nach <Datum> JJJJMMTTHHMMSS\n  -tb<date>     Dateien geändert vor <Datum> JJJJMMTTHHMMSS\n  -tk           Ursprüngliche Archivzeit behalten\n  -tl           Archivzeit auf die neueste Datei setzen\n  -tn<time>     Dateien neuer als <Zeit>\n  -to<time>     Dateien älter als <Zeit>\n  -ts[m,c,a]    Dateizeit speichern oder wiederherstellen (Änderung, Erstellung, Zugriff)\n  -u            Dateien aktualisieren\n  -v<size>[k,b] Volumen mit Größe=<Größe>*1000 [*1024, *1]\n  -vd           Wird akzeptiert und ignoriert; Datenträger werden nicht gelöscht\n  -ver[n]       Dateiversionen\n  -vn           Alte Volumenbenennung\n  -vp           Vor jedem Volumen anhalten\n  -w<path>      Arbeitsverzeichnis\n  -x<file>      Angegebene Datei ausschließen\n  -x@           Auszuschließende Namen von der Standardeingabe\n  -x@<list>     Dateien aus der angegebenen Liste ausschließen\n  -y            Alle Fragen mit Ja beantworten\n  -z[file]      Archivkommentar aus einer Datei lesen\n\n<unrar-free Langoptionen>\n  --extract           Dateien entpacken (wie x)\n  --extract-no-paths  Dateien ohne Pfade entpacken (wie e)\n  --extract-newer     Nur neuere Dateien entpacken\n  --list              Archiv auflisten (wie l)\n  --print             Datei auf die Standardausgabe (wie p)\n  --force             Vorhandene Dateien überschreiben\n  --password <pwd>    Passwort setzen\n  --verbose           Ausführliche Liste\n  --version           Version anzeigen\n  --help              Hilfe anzeigen
+status.ok	OK
+status.all_ok	Alles OK
+status.done	Fertig
+host.windows	Windows
+host.unix	Unix
+err.generic	FEHLER: {0}
+err.with_path	FEHLER: {0} ({1})
+err.locked_modify	FEHLER: Archiv ist gesperrt und kann nicht geändert werden
+err.locked	FEHLER: Archiv ist gesperrt
+err.no_archive	FEHLER: Archivname fehlt
+err.unknown_cmd	Unbekannter Befehl: {0}
+err.open_file	Datei kann nicht geöffnet werden: {0}
+err.create_file	Datei kann nicht erstellt werden: {0}
+err.create_comment	Kommentardatei kann nicht erstellt werden: {0}
+err.save	Speicherfehler: {0}
+err.cw_needs_file	FEHLER: cw braucht einen Kommentardateinamen
+err.rn_pairs	FEHLER: rn braucht Paare <quelle> <ziel>
+err.extract	Entpackfehler {0}: {1}
+err.test	Test fehlgeschlagen {0}: {1}
+err.total	Fehler insgesamt: {0}
+err.repair	Reparatur fehlgeschlagen: keine gültigen RAR-5.0-Datensätze gefunden
+err.ma4	FEHLER: RAR 4.x (-ma4) wird nicht unterstützt; verwenden Sie -ma5
+err.trash	{0} kann nicht in den Papierkorb verschoben werden
+err.poweroff	Der Computer kann nicht heruntergefahren werden
+err.rev	Fehlende Volumen können nicht wiederhergestellt werden
+err.rev_write	Wiederherstellungsvolumen können nicht erstellt werden
+err.no_files	Keine Dateien zu verarbeiten
+list.archive	Archiv: {0}
+list.details	Details: RAR 5
+list.solid	, solides Archiv
+list.recovery	, Wiederherstellungsdaten
+list.locked	, gesperrt
+list.enc_hdr	, verschlüsselte Kopfdaten
+list.sfx	, SFX
+list.volume	, Volumen
+list.name	        Name: {0}
+list.type	        Typ: {0}
+list.type_dir	Verzeichnis
+list.type_file	Datei
+list.size	       Größe: {0}
+list.packed	  Gepackt: {0}
+list.ratio	     Quote: {0}%
+list.mtime	   Geändert: {0}
+list.ctime	    Erstellt: {0}
+list.atime	   Zugegriffen: {0}
+list.attr	  Attribute: {0}
+list.crc	       CRC32: {0}
+list.blake	    BLAKE2sp: {0}
+list.host	     Host-OS: {0}
+list.comp	 Komprimierung: RAR 5.0(v50) -m{0} -md={1}
+list.solid_word	 solide
+list.password	    Passwort: ja (AES-256)
+list.owner	   Besitzer: {0}
+list.hdr_verbose	 Attribute      Größe   Gepackt Quote   Datum      Zeit   Prüfsumme  Name
+list.rule_verbose	----------- ---------  -------- ----- ---------- -----  --------  ----
+list.hdr_brief	 Attribute      Größe   Datum      Zeit   Name
+list.rule_brief	----------- ---------  ---------- -----  ----
+action.testing	Teste Archiv {0}
+action.testing_file	Teste       {0}  {1}
+action.extracting_from	Entpacke aus {0}
+action.creating_dir	Erstelle    {0}  {1}
+action.extracting	Entpacke    {0}  {1}
+action.no_files_extract	Keine Dateien zum Entpacken
+action.reading_comment	Lese Kommentar aus {0}
+action.updating	Aktualisiere Archiv {0}
+action.creating_sfx	Erstelle SFX-Archiv {0}
+action.creating	Erstelle Archiv {0}
+action.adding	Hinzufügen  {0}  {1}
+action.updating_file	Aktualisiere {0}  {1}
+action.deleting	Lösche {0}
+action.adding_rr	Füge Wiederherstellungsdaten hinzu
+action.locking	Sperre Archiv
+action.locking_path	Sperre Archiv {0}
+action.no_files_delete	Keine Dateien zum Löschen
+action.delete_empty	Lösche leeres Archiv {0}
+action.renaming	Benenne {0} in {1} um
+action.no_match	Keine Dateien entsprachen
+action.repairing	Repariere Archiv {0}
+action.rebuilding	Baue {0} neu auf
+action.found_rr	Wiederherstellungsdaten gefunden
+action.found	Gefunden {0}
+action.repair_done	Fertig
+action.processing	Verarbeite {0}
+action.found_in	Treffer in {0}:
+action.comment_prompt	Kommentar eingeben (Ende mit Strg+Z oder EOF):
+action.adding_comment	Füge Kommentar zu {0} hinzu  {1}
+action.adding_rr_to	Füge Wiederherstellungsdaten zu {0} hinzu
+action.writing_comment	Schreibe Kommentar nach {0}  {1}
+action.overwrite	{0} existiert bereits. Überschreiben? [Y]es/[N]ein/[A]lle/[Q]uit 
+action.password	Passwort: 
+action.pause_volume	Eingabetaste für Volumen {0}
+action.email	Öffne ein E-Mail-Programm für {0}
+action.email_missing	Kein E-Mail-Programm für {0}; das Archiv bleibt auf der Platte
+action.rev_write	Erstelle Wiederherstellungsvolumen {0}
+action.rev_restore	Stelle Volumen {0} wieder her
+action.recompress	Komprimiere Archiv neu
+action.linking	Verknüpfe   {0}  {1}
+warn.vd	-vd löscht keine Datenträger
+warn.ao	-ao folgt dem Windows-Archiv-Attribut; auf diesem System wird jede Datei aufgenommen
+arc.cannot_open	Kann {0} nicht öffnen
+arc.rar4	RAR 4.x wird nicht unterstützt; nur RAR 5.0 wird unterstützt
+arc.not_rar	{0} ist kein RAR-Archiv
+arc.bad_enc_hdr	Verschlüsselter Kopf ist beschädigt oder das Passwort ist falsch
+arc.trunc_enc	Verschlüsselter Kopf ist abgeschnitten
+arc.bad_hdr_size	Kopfgröße konnte nicht gelesen werden
+arc.unexpected_end	Unerwartetes Ende des Archivs
+arc.bad_hdr_crc	Kopfprüfsumme (CRC32) stimmt nicht
+arc.need_password	Verschlüsselte Köpfe brauchen ein Passwort (-p oder -hp)
+arc.bad_password	Falsches Passwort
+arc.data_oob	Dateidaten reichen über das Archivende hinaus
+arc.missing_vol	Nächstes Volumen nicht gefunden: {0}
+arc.need_file_password	Passwort erforderlich: {0}
+arc.bad_file_password	Falsches Passwort: {0}
+arc.bad_stream	Komprimierte Daten sind beschädigt: {0}
+arc.crc	Prüfsummenfehler (CRC32): {0}
+arc.blake	Prüfsummenfehler (BLAKE2sp): {0}
+arc.write	Archiv kann nicht geschrieben werden: {0}
+arc.write_vol	Volumen kann nicht geschrieben werden: {0}

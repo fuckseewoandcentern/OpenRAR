@@ -1,0 +1,121 @@
+# OpenRAR English UI. Lines are key<TAB>value. Use \n for newlines.
+banner.title	RAR 7.01 x64 (OpenRAR Clean-Room GPLv3+)
+help.body	Usage:     rar <command> -<switch 1> -<switch N> <archive> <files...>\n               <@listfiles...> <path_to_extract/>\n\n<Commands>\n  a             Add files to archive\n  c             Add archive comment\n  ch            Change archive parameters\n  cw            Write archive comment to file\n  d             Delete files from archive\n  e             Extract files without archived paths\n  f             Freshen files in archive\n  i[par]=<str>  Find string in archives\n  k             Lock archive\n  l[t[a],b]     List archive contents [technical[all], bare]\n  m[f]          Move to archive [files only]\n  p             Print file to stdout\n  r             Repair archive\n  rc            Reconstruct missing volumes\n  rn            Rename archived files\n  rr[N]         Add data recovery record\n  rv[N]         Create recovery volumes\n  s[name|-]     Convert archive to or from SFX\n  t             Test archive files\n  u             Update files in archive\n  v[t[a],b]     Verbosely list archive contents\n  x             Extract files with full path\n\n<Switches>\n  -             Stop switches scanning\n  -?            Show help\n  -@[+]         Disable [enable] file lists\n  -ac           Clear Archive attribute after compression or extraction\n  -ad[1,2]      Append archive name to destination path\n  -ag[format]   Generate archive name using the current date\n  -ai           Ignore file attributes\n  -ao           Add files with Archive attribute set\n  -ap<path>     Set path inside archive\n  -as           Synchronize archive contents\n  -c-           Disable comments show\n  -cfg-         Disable configuration file and the RAR variable\n  -cl           Convert names to lower case\n  -cu           Convert names to upper case\n  -df           Delete files after archiving\n  -dh           Open shared files\n  -dr           Delete files to Recycle Bin / Trash after archiving\n  -ds           Disable name sort for solid archives\n  -dw           Wipe files after archiving\n  -ed           Do not add empty directories\n  -en           Do not add 'end of archive' block\n  -ep           Exclude paths from names\n  -ep1          Exclude base directory from names\n  -ep2          Expand paths to full\n  -ep3          Expand paths to full including the drive letter\n  -ep4<path>    Exclude the path prefix from names\n  -f            Freshen files\n  -hp[password] Encrypt both file data and headers\n  -ht[b|c]      Select hash type [BLAKE2sp|CRC32]\n  -id[c,d,n,p,q] Disable messages\n  -ieml[.][addr] Open a mail composer for the finished archive\n  -ierr         Send all messages to stderr\n  -ilog[name]   Log errors to file\n  -inul         Disable all messages\n  -ioff[n]      Turn PC off when done (1 halt, 2 hibernate, 3 sleep, 4 reboot)\n  -isnd         Enable sound\n  -iver         Display the version number\n  -k            Lock archive\n  -kb           Keep broken extracted files\n  -log[=name]   Write names to log file\n  -m<0..5>      Set compression level (0-store...3-default...5-maximal)\n  -ma[4|5]      Specify a version of archiving format (5 only)\n  -mc<par>      Set advanced compression parameters\n  -md<n>[k,m,g] Dictionary size\n  -ms[ext;ext]  Specify file types to store\n  -mt<threads>  Set the number of threads\n  -n<file>      Additionally filter included files\n  -n@           Read additional filter masks from stdin\n  -n@<list>     Read additional filter masks from list file\n  -o[+|-]       Set the overwrite mode\n  -oc           Set NTFS Compressed attribute\n  -oh           Save hard links as the link instead of the file\n  -ol           Process symbolic links as the link\n  -oni          Allow potentially incompatible names\n  -op<path>     Set the output path for extracted files\n  -or           Rename files automatically\n  -ow           Save or restore file owner and group\n  -p[password]  Set password (empty -p prompts on a terminal)\n  -qo[-|+]      Add quick open information\n  -r            Recurse subdirectories\n  -r-           Disable recursion\n  -r0           Recurse subdirectories for wildcard names only\n  -ri<p>[:<s>]  Set priority (0..15) and sleep time, ms\n  -rr[N]        Add data recovery record\n  -rv[N]        Create recovery volumes\n  -s[<N>,v[-],e] Create solid archive\n  -s-           Disable solid archiving\n  -sc<chr>[obj] Specify the character set (u, a, o) and objects (f, l, c)\n  -sfx[name]    Create SFX archive\n  -si[name]     Read data from stdin\n  -sl<size>     Process files with size less than specified\n  -sm<size>     Process files with size more than specified\n  -t            Test files after archiving\n  -ta<date>     Process files modified after <date> in YYYYMMDDHHMMSS format\n  -tb<date>     Process files modified before <date> in YYYYMMDDHHMMSS format\n  -tk           Keep original archive time\n  -tl           Set archive time to latest file\n  -tn<time>     Process files newer than <time>\n  -to<time>     Process files older than <time>\n  -ts[m,c,a]    Save or restore file time (modify, create, access)\n  -u            Update files\n  -v<size>[k,b] Create volumes with size=<size>*1000 [*1024, *1]\n  -vd           Accepted and ignored; disks are not erased\n  -ver[n]       File version control\n  -vn           Use the old style volume naming scheme\n  -vp           Pause before each volume\n  -w<path>      Assign work directory\n  -x<file>      Exclude specified file\n  -x@           Read file names to exclude from stdin\n  -x@<list>     Exclude files listed in specified list file\n  -y            Assume Yes on all queries\n  -z[file]      Read archive comment from file\n\n<unrar-free long options>\n  --extract           Extract files (same as x)\n  --extract-no-paths  Extract files without paths (same as e)\n  --extract-newer     Extract only newer files\n  --list              List archive (same as l)\n  --print             Print file to stdout (same as p)\n  --force             Overwrite existing files\n  --password <pwd>    Set password\n  --verbose           Verbose list\n  --version           Show version\n  --help              Show help\n
+status.ok	OK
+status.all_ok	All OK
+status.done	Done
+host.windows	Windows
+host.unix	Unix
+err.generic	ERROR: {0}
+err.with_path	ERROR: {0} ({1})
+err.locked_modify	ERROR: archive is locked and cannot be modified
+err.locked	ERROR: archive is locked
+err.no_archive	ERROR: archive name is not specified
+err.unknown_cmd	Unknown command: {0}
+err.open_file	Cannot open file {0}
+err.create_file	Cannot create file {0}
+err.create_comment	Cannot create comment file {0}
+err.save	Save error: {0}
+err.cw_needs_file	ERROR: cw requires a comment file name
+err.rn_pairs	ERROR: rn requires <source> <destination> pairs
+err.extract	Extract error {0}: {1}
+err.test	Test failed {0}: {1}
+err.total	Total errors: {0}
+err.repair	Repair failed: no valid RAR 5.0 file records were found
+err.ma4	ERROR: RAR 4.x (-ma4) is not supported; use -ma5
+err.trash	Cannot move {0} to the recycle bin
+err.poweroff	Cannot power off the computer
+err.rev	Cannot reconstruct missing volumes
+err.rev_write	Cannot create recovery volumes
+err.no_files	No files to process
+list.archive	Archive: {0}
+list.details	Details: RAR 5
+list.solid	, solid
+list.recovery	, recovery record
+list.locked	, locked
+list.enc_hdr	, encrypted headers
+list.sfx	, SFX
+list.volume	, volume
+list.name	        Name: {0}
+list.type	        Type: {0}
+list.type_dir	Directory
+list.type_file	File
+list.size	        Size: {0}
+list.packed	  Packed size: {0}
+list.ratio	       Ratio: {0}%
+list.mtime	    Modified: {0}
+list.ctime	     Created: {0}
+list.atime	    Accessed: {0}
+list.attr	  Attributes: {0}
+list.crc	       CRC32: {0}
+list.blake	    BLAKE2sp: {0}
+list.host	     Host OS: {0}
+list.comp	  Compression: RAR 5.0(v50) -m{0} -md={1}
+list.solid_word	 solid
+list.password	    Password: yes (AES-256)
+list.owner	       Owner: {0}
+list.hdr_verbose	 Attributes      Size    Packed  Ratio   Date       Time     Checksum   Name
+list.rule_verbose	----------- ---------  -------- ----- ---------- -----  --------  ----
+list.hdr_brief	 Attributes      Size    Date       Time   Name
+list.rule_brief	----------- ---------  ---------- -----  ----
+action.testing	Testing archive {0}
+action.testing_file	Testing     {0}  {1}
+action.extracting_from	Extracting from {0}
+action.creating_dir	Creating    {0}  {1}
+action.extracting	Extracting  {0}  {1}
+action.no_files_extract	No files to extract
+action.reading_comment	Reading comment from {0}
+action.updating	Updating archive {0}
+action.creating_sfx	Creating SFX archive {0}
+action.creating	Creating archive {0}
+action.adding	Adding      {0}  {1}
+action.updating_file	Updating    {0}  {1}
+action.deleting	Deleting {0}
+action.adding_rr	Adding recovery record
+action.locking	Locking archive
+action.locking_path	Locking archive {0}
+action.no_files_delete	No files to delete
+action.delete_empty	Deleting empty archive {0}
+action.renaming	Renaming {0} to {1}
+action.no_match	No files matched
+action.repairing	Repairing archive {0}
+action.rebuilding	Rebuilding {0}
+action.found_rr	Recovery record found
+action.found	Found {0}
+action.repair_done	Done
+action.processing	Processing {0}
+action.found_in	Match in {0}:
+action.comment_prompt	Enter comment (end with Ctrl+Z or EOF):
+action.adding_comment	Adding comment to {0}  {1}
+action.adding_rr_to	Adding recovery record to {0}
+action.writing_comment	Writing comment to {0}  {1}
+action.overwrite	{0} already exists. Overwrite? [Y]es/[N]o/[A]ll/[Q]uit 
+action.password	Enter password: 
+action.pause_volume	Press Enter to continue with volume {0}
+action.email	Opening a mail composer for {0}
+action.email_missing	No mail composer found for {0}; the archive was left on disk
+action.rev_write	Creating recovery volume {0}
+action.rev_restore	Restoring volume {0}
+action.recompress	Recompressing archive
+action.linking	Linking     {0}  {1}
+warn.vd	-vd does not erase disks
+warn.ao	-ao follows the Windows Archive attribute; on this system every file is included
+arc.cannot_open	Cannot open {0}
+arc.rar4	RAR 4.x is not supported; only RAR 5.0 is supported
+arc.not_rar	{0} is not a RAR archive
+arc.bad_enc_hdr	Encrypted header is corrupt or the password is wrong
+arc.trunc_enc	Encrypted header is truncated
+arc.bad_hdr_size	Failed to parse the header size
+arc.unexpected_end	Unexpected end of archive
+arc.bad_hdr_crc	Header checksum (CRC32) mismatch
+arc.need_password	Encrypted headers need a password (-p or -hp)
+arc.bad_password	Wrong password
+arc.data_oob	File data extends past the end of the archive
+arc.missing_vol	Next volume was not found: {0}
+arc.need_file_password	Password required: {0}
+arc.bad_file_password	Wrong password: {0}
+arc.bad_stream	Compressed data is corrupt: {0}
+arc.crc	Checksum error (CRC32 mismatch): {0}
+arc.blake	Checksum error (BLAKE2sp mismatch): {0}
+arc.write	Cannot write archive {0}
+arc.write_vol	Cannot write volume {0}

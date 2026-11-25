@@ -64,6 +64,36 @@ struct CliConfig {
     std::string ag_format;          // -ag[format]
     bool version_control = false;   // -ver[n]
     int  max_versions = 0;          // n in -ver[n]
+    bool disable_lists = false;     // -@
+    bool freshen_switch = false;    // -f
+    bool update_switch = false;     // -u
+    bool wipe_after = false;        // -dw
+    bool recycle_after = false;     // -dr
+    bool save_symlinks = false;     // -ol
+    bool save_hardlinks = false;    // -oh
+    bool save_owner = false;        // -ow
+    bool archive_attr_only = false; // -ao
+    bool open_shared = false;       // -dh
+    bool allow_incompatible = false;// -oni
+    bool ntfs_compress = false;     // -oc
+    bool pause_volumes = false;     // -vp
+    bool beep_when_done = false;    // -isnd
+    int  power_off = 0;             // -ioff[n], 0 = do not
+    std::string email_to;           // -ieml[addr]
+    int  threads = 0;               // -mt, 0 = hardware default
+    int  priority = -1;             // -ri
+    int  sleep_ms = 0;
+    int  solid_files = 0;           // -s<N>, 0 = one solid group
+    bool solid_by_extension = false;// -se
+    bool independent_volumes = false;// -sv
+    bool extract_newer = false;     // --extract-newer
+    bool prompt_password = false;   // bare -p / -hp
+    char charset = 0;               // -sc: 0, 'u', 'a', 'o'
+    std::string charset_objects;
+    bool method_explicit = false;
+    bool solid_explicit = false;
+    int  recovery_volumes = 0;      // -rv / rv command
+    int  format_version = 5;        // -ma4 / -ma5
 
     // File filtering switches
     uint64_t size_less = 0;         // -sl<size> (0 = disabled)

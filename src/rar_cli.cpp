@@ -7,16 +7,22 @@
  */
 
 #include "rar_cli.h"
+#include "rar_i18n.h"
+#include "rar_os.h"
 #include <algorithm>
 #include <cctype>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <iomanip>
 #include <iostream>
+#include <map>
 #include <sstream>
+#include <thread>
 
 #ifdef _WIN32
 #ifndef NOMINMAX
@@ -229,128 +235,15 @@ bool matches_entry_filters(const CliConfig& cfg, const std::string& internal_nam
 void print_banner(const CliConfig& cfg) {
     if (cfg.quiet_copyright || cfg.quiet_all || cfg.quiet_mode) return;
     out_println(cfg, "");
-    out_println(cfg, "RAR 7.01 x64 (OpenRAR Clean-Room GPLv3+)  ");
+    out_println(cfg, msg("banner.title"));
     out_println(cfg, "");
 }
 
 void print_help(const CliConfig& cfg) {
     print_banner(cfg);
-    const char* help_text =
-R"(用法:     rar <命令> -<开关 1> -<开关 N> <压缩文件> <文件...>
-               <@列表文件...> <解压路径\>
-
-<命令>
-  a             添加文件到压缩文件
-  c             添加压缩文件注释
-  ch            更改压缩文件参数
-  cw            将压缩文件注释写入文件
-  d             从压缩文件删除文件
-  e             解压文件但不包含路径
-  f             刷新压缩文件中的文件
-  i[par]=<str>  在压缩文件中查找字符串
-  k             锁定压缩文件
-  l[t[a],b]     列出压缩文件内容 [技术信息[全部], 简洁]
-  m[f]          移动到压缩文件 [仅限文件]
-  p             打印文件到标准输出
-  r             修复压缩文件
-  rc            重建丢失的卷
-  rn            重命名压缩文件中的文件
-  rr[N]         添加数据恢复记录
-  rv[N]         创建恢复卷
-  s[name|-]     转换压缩文件为自解压格式或从自解压格式转换
-  t             测试压缩文件
-  u             更新压缩文件中的文件
-  v[t[a],b]     详细列出压缩文件内容 [技术信息[全部], 简洁]
-  x             使用完整路径解压文件
-
-<开关>
-  -             停止扫描开关
-  -?            显示帮助信息
-  -@[+]         禁用 [启用] 文件列表
-  -ac           压缩或解压后清除存档属性
-  -ad[1,2]      附加压缩文件名到目标路径
-  -ag[format]   使用当前日期生成压缩文件名
-  -ai           忽略文件属性
-  -ap<path>     设置压缩文件内部路径
-  -as           同步压缩文件内容
-  -c-           禁用注释显示
-  -cfg-         禁用读取配置
-  -cl           转换名称为小写
-  -cu           转换名称为大写
-  -df           压缩后删除文件
-  -dr           压缩后删除文件到回收站
-  -ds           禁用固实压缩文件的名称排序
-  -dw           压缩后擦除文件
-  -ed           不添加空目录
-  -ep           从名称中排除路径
-  -ep1          从名称中排除基本目录
-  -ep2          展开为完整路径
-  -ep3          展开路径为包含驱动器盘符的完整路径
-  -ep4<path>    从名称中排除路径前缀
-  -f            刷新文件
-  -hp[password] 加密文件数据和标头
-  -ht[b|c]      选择哈希类型 [BLAKE2,CRC32] 用于文件校验和
-  -id[c,d,n,p,q] 禁用消息
-  -ierr         发送所有消息到标准错误输出
-  -ilog[name]   记录错误到文件
-  -inul         禁用所有消息
-  -iver         显示版本号
-  -k            锁定压缩文件
-  -kb           保留损坏的已解压文件
-  -log[f][=name] 将名称写入日志文件
-  -m<0..5>      设置压缩级别 (0-存储...3-默认...5-最大)
-  -md<n>[k,m,g] 字典大小 (以 KB, MB 或 GB 为单位)
-  -ms[ext;ext]  指定直接存储的文件类型
-  -mt<threads>  设置线程数
-  -n<file>      仅包含指定文件
-  -n@           从标准输入读取附加包含掩码
-  -n@<list>     从列表文件读取附加包含掩码
-  -o[+|-]       设置覆盖模式
-  -op<path>     设置解压文件的输出路径
-  -or           自动重命名文件
-  -p[password]  设置密码
-  -qo[-|+]      添加快速打开信息 [无|强制]
-  -r            递归子目录
-  -r-           禁用递归
-  -r0           仅使用通配符名称递归子目录
-  -rr[N]        添加数据恢复记录
-  -rv[N]        创建恢复卷
-  -s[<N>,v[-],e] 创建固实压缩文件
-  -s-           禁用固实归档
-  -sc<chr>[obj] 指定字符集
-  -sfx[name]    创建自解压压缩文件
-  -si[name]     从标准输入 (stdin) 读取数据
-  -sl<size>     处理小于指定大小的文件
-  -sm<size>     处理大于指定大小的文件
-  -t            压缩后测试文件
-  -ta<d>        处理修改日期晚于 <d> 的文件 (YYYYMMDDHHMMSS)
-  -tb<d>        处理修改日期早于 <d> 的文件 (YYYYMMDDHHMMSS)
-  -tk           保留原始压缩文件时间
-  -tl           设置压缩文件时间为最新文件时间
-  -tn<t>        处理比 <t> 更新的文件
-  -to<t>        处理比 <t> 更旧的文件
-  -ts[m,c,a]    保存或恢复文件时间 (修改, 创建, 访问)
-  -u            更新文件
-  -v<size>[k,b] 创建指定大小的卷 (<size>*1000 [*1024, *1])
-  -ver[n]       文件版本控制
-  -w<path>      指定工作目录
-  -x<file>      排除指定文件
-  -x@           从标准输入读取要排除的文件名
-  -x@<list>     排除指定列表文件中列出的文件
-  -y            假设所有询问均回答“是”
-  -z[file]      从文件读取压缩文件注释
-
-<unrar-free 兼容长选项>
-  --extract           解压文件 (等同于 x)
-  --extract-no-paths  解压文件不包含路径 (等同于 e)
-  --extract-newer     仅解压更新的文件 (等同于 -u)
-  --list              列出压缩文件内容 (等同于 l)
-  --print             打印文件到标准输出 (等同于 p)
-  --force             覆盖已存在文件 (等同于 -o+)
-  --password <pwd>    指定密码 (等同于 -p<pwd>)
-  --verbose           详细输出)";
-    out_println(cfg, help_text);
+    out_println(cfg, msg("help.body"));
 }
+
 
 uint64_t parse_size_With_unit(const std::string& str, char default_unit = 'b') {
     if (str.empty()) return 0;
@@ -410,7 +303,13 @@ uint64_t parse_rar_duration_seconds(const std::string& tstr) {
     return total_sec;
 }
 
-void read_list_file(const std::string& list_path, std::vector<std::string>& out_items) {
+bool charset_applies(const CliConfig& cfg, char obj) {
+    if (cfg.charset != 'a' && cfg.charset != 'o') return false;
+    if (cfg.charset_objects.empty()) return true;
+    return cfg.charset_objects.find(obj) != std::string::npos;
+}
+
+void read_list_file(const std::string& list_path, std::vector<std::string>& out_items, char charset = 0) {
     std::istream* in = nullptr;
     std::ifstream fin;
     if (list_path.empty()) {
@@ -433,6 +332,7 @@ void read_list_file(const std::string& list_path, std::vector<std::string>& out_
             if (line.size() >= 2 && line.front() == '"' && line.back() == '"') {
                 line = line.substr(1, line.size() - 2);
             }
+            if (charset == 'a' || charset == 'o') line = decode_text(line, charset);
             out_items.push_back(line);
         }
     }
@@ -472,6 +372,18 @@ void format_winft_datetime(uint64_t winft, std::string& out_date, std::string& o
 }
 
 std::string format_attributes(const RarFileEntry& e) {
+    if (e.host_os == HOST5_UNIX) {
+        unsigned mode = (unsigned)e.attributes;
+        char buf[11];
+        unsigned type = mode & 0170000u;
+        if (e.redir_type == REDIR5_UNIXSYMLINK || e.redir_type == REDIR5_WINSYMLINK || type == 0120000u) buf[0] = 'l';
+        else if (e.is_dir || type == 0040000u) buf[0] = 'd';
+        else buf[0] = '-';
+        const char* rwx = "rwxrwxrwx";
+        for (int i = 0; i < 9; ++i) buf[1 + i] = (mode & (1u << (8 - i))) ? rwx[i] : '-';
+        buf[10] = '\0';
+        return std::string(buf);
+    }
     char buf[8] = {'.', '.', '.', '.', '.', '.', '.', '\0'};
     if (e.is_dir || (e.attributes & 0x10)) buf[3] = 'D';
     if (e.attributes & 0x20) buf[2] = 'A';
@@ -483,75 +395,59 @@ std::string format_attributes(const RarFileEntry& e) {
 
 void get_file_times_and_attrs(const fs::path& p, bool is_dir,
                               uint64_t& mtime_winft, uint64_t& ctime_winft,
-                              uint64_t& atime_winft, uint64_t& attrs) {
-    mtime_winft = current_win_filetime();
-    ctime_winft = mtime_winft;
-    atime_winft = mtime_winft;
-    attrs = is_dir ? 0x10 : 0x20;
-#ifdef _WIN32
-    WIN32_FILE_ATTRIBUTE_DATA fad{};
-    if (GetFileAttributesExW(p.c_str(), GetFileExInfoStandard, &fad)) {
-        attrs = fad.dwFileAttributes;
-        mtime_winft = (uint64_t(fad.ftLastWriteTime.dwHighDateTime) << 32) | fad.ftLastWriteTime.dwLowDateTime;
-        ctime_winft = (uint64_t(fad.ftCreationTime.dwHighDateTime) << 32) | fad.ftCreationTime.dwLowDateTime;
-        atime_winft = (uint64_t(fad.ftLastAccessTime.dwHighDateTime) << 32) | fad.ftLastAccessTime.dwLowDateTime;
-    }
-#else
-    std::error_code ec;
-    auto ftime = fs::last_write_time(p, ec);
-    if (!ec) {
-        auto sctp = std::chrono::time_point_cast<std::chrono::seconds>(
-            ftime - fs::file_time_type::clock::now() + std::chrono::system_clock::now());
-        mtime_winft = unix_to_win_filetime(sctp.time_since_epoch().count(), 0);
+                              uint64_t& atime_winft, uint64_t& attrs,
+                              OsFileInfo* full = nullptr) {
+    OsFileInfo info;
+    if (!get_file_info(fspath_to_utf8(p), info)) {
+        mtime_winft = current_win_filetime();
         ctime_winft = mtime_winft;
         atime_winft = mtime_winft;
-    }
+        attrs = is_dir ? 0x10 : 0x20;
+        info.attributes = attrs;
+        info.is_dir = is_dir;
+        info.mtime_winft = mtime_winft;
+        info.ctime_winft = ctime_winft;
+        info.atime_winft = atime_winft;
+#ifdef _WIN32
+        info.host_os = HOST5_WINDOWS;
+#else
+        info.host_os = HOST5_UNIX;
 #endif
+    } else {
+        mtime_winft = info.mtime_winft;
+        ctime_winft = info.ctime_winft;
+        atime_winft = info.atime_winft;
+        attrs = info.attributes;
+    }
+    if (full) *full = info;
 }
 
 void apply_extracted_times_and_attrs(const fs::path& p, const RarFileEntry& e, const CliConfig& cfg) {
-#ifdef _WIN32
-    DWORD flags = e.is_dir ? FILE_FLAG_BACKUP_SEMANTICS : FILE_ATTRIBUTE_NORMAL;
-    HANDLE hFile = CreateFileW(p.c_str(), FILE_WRITE_ATTRIBUTES,
-                               FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                               nullptr, OPEN_EXISTING, flags, nullptr);
-    if (hFile != INVALID_HANDLE_VALUE) {
-        FILETIME ft_m{}, ft_c{}, ft_a{};
-        const FILETIME* p_m = nullptr;
-        const FILETIME* p_c = nullptr;
-        const FILETIME* p_a = nullptr;
-        if (e.mtime_winft != 0) {
-            ft_m.dwLowDateTime = (DWORD)(e.mtime_winft & 0xFFFFFFFFULL);
-            ft_m.dwHighDateTime = (DWORD)(e.mtime_winft >> 32);
-            p_m = &ft_m;
-        }
-        if (e.ctime_winft != 0) {
-            ft_c.dwLowDateTime = (DWORD)(e.ctime_winft & 0xFFFFFFFFULL);
-            ft_c.dwHighDateTime = (DWORD)(e.ctime_winft >> 32);
-            p_c = &ft_c;
-        }
-        if (e.atime_winft != 0) {
-            ft_a.dwLowDateTime = (DWORD)(e.atime_winft & 0xFFFFFFFFULL);
-            ft_a.dwHighDateTime = (DWORD)(e.atime_winft >> 32);
-            p_a = &ft_a;
-        }
-        SetFileTime(hFile, p_c, p_a, p_m);
-        CloseHandle(hFile);
-    }
-    if (!cfg.ignore_attributes && !e.is_dir && e.attributes != 0) {
-        DWORD win_attr = (DWORD)(e.attributes & 0x27); // R, H, S, A
-        if (cfg.clear_archive_attr) win_attr &= ~FILE_ATTRIBUTE_ARCHIVE;
-        if (win_attr != 0) SetFileAttributesW(p.c_str(), win_attr);
-    }
-#else
-    (void)p; (void)e; (void)cfg;
-#endif
+    OsFileInfo info;
+    info.mtime_winft = e.mtime_winft;
+    info.ctime_winft = e.ctime_winft;
+    info.atime_winft = e.atime_winft;
+    info.attributes = e.attributes;
+    info.host_os = e.host_os;
+    info.is_dir = e.is_dir;
+    info.is_symlink = (e.redir_type == REDIR5_UNIXSYMLINK || e.redir_type == REDIR5_WINSYMLINK);
+    info.has_owner = e.has_owner;
+    info.uid = e.owner_uid;
+    info.gid = e.owner_gid;
+    info.user = e.owner_user;
+    info.group = e.owner_group;
+    apply_file_info(fspath_to_utf8(p), info, !cfg.ignore_attributes, cfg.save_owner,
+                    cfg.clear_archive_attr, cfg.ntfs_compress);
 }
 
 std::string ensure_archive_extension(const std::string& path, bool is_sfx) {
     fs::path p = make_fspath(path);
     if (p.has_extension()) return path;
+#ifdef _WIN32
     return path + (is_sfx ? ".exe" : ".rar");
+#else
+    return path + (is_sfx ? ".sfx" : ".rar");
+#endif
 }
 
 std::string apply_ag_format(const std::string& base_path, const std::string& fmt) {
@@ -681,7 +577,11 @@ bool parse_switch(const std::string& sw_raw, CliConfig& cfg, const std::vector<s
             cfg.ep_mode = 0;
             return true;
         }
-        if (lopt == "extract-newer") { cfg.command = (cfg.command.empty() ? "x" : cfg.command); return true; }
+        if (lopt == "extract-newer") {
+            cfg.extract_newer = true;
+            if (cfg.command.empty()) cfg.command = "x";
+            return true;
+        }
         if (lopt == "list") { if (cfg.command.empty()) cfg.command = "l"; return true; }
         if (lopt == "print") { if (cfg.command.empty()) cfg.command = "p"; return true; }
         if (lopt == "force") { cfg.overwrite_mode = 1; cfg.assume_yes = true; return true; }
@@ -711,13 +611,37 @@ bool parse_switch(const std::string& sw_raw, CliConfig& cfg, const std::vector<s
     if (sw_low == "o+" || sw_low == "o") { cfg.overwrite_mode = 1; return true; }
     if (sw_low == "o-") { cfg.overwrite_mode = -1; return true; }
     if (sw_low == "or") { cfg.auto_rename = true; return true; }
+    if (sw_low == "ol" || sw_low == "ola") { cfg.save_symlinks = true; return true; }
+    if (sw_low == "ol-") { cfg.save_symlinks = false; return true; }
+    if (sw_low == "oh") { cfg.save_hardlinks = true; return true; }
+    if (sw_low == "ow") { cfg.save_owner = true; return true; }
+    if (sw_low == "oc") { cfg.ntfs_compress = true; return true; }
+    if (sw_low == "oni") { cfg.allow_incompatible = true; return true; }
+    if (sw_low == "ao") { cfg.archive_attr_only = true; return true; }
+    if (sw_low == "en") { cfg.arch_opts.omit_endarc = true; return true; }
+    if (sw_low == "dh") { cfg.open_shared = true; return true; }
+    if (sw_low == "f") { cfg.freshen_switch = true; cfg.update_switch = false; return true; }
+    if (sw_low == "u") { cfg.update_switch = true; cfg.freshen_switch = false; return true; }
+    if (sw_low == "@" || sw_low == "@-") { cfg.disable_lists = true; return true; }
+    if (sw_low == "@+") { cfg.disable_lists = false; return true; }
+    if (sw_low.substr(0, 2) == "ri") {
+        std::string rest = sw_low.substr(2);
+        auto colon = rest.find(':');
+        std::string ps = (colon == std::string::npos) ? rest : rest.substr(0, colon);
+        std::string ss = (colon == std::string::npos) ? std::string() : rest.substr(colon + 1);
+        if (!ps.empty()) cfg.priority = std::atoi(ps.c_str());
+        if (!ss.empty()) cfg.sleep_ms = std::atoi(ss.c_str());
+        return true;
+    }
     if (sw_low == "r") { cfg.recurse = true; cfg.disable_recurse = false; return true; }
     if (sw_low == "r0") { cfg.recurse_wildcard = true; return true; }
     if (sw_low == "r-") { cfg.disable_recurse = true; cfg.recurse = false; return true; }
     if (sw_low == "k") { cfg.arch_opts.lock_archive = true; return true; }
     if (sw_low == "kb") { cfg.keep_broken = true; return true; }
     if (sw_low == "t") { cfg.test_after_archive = true; return true; }
-    if (sw_low == "df" || sw_low == "dr" || sw_low == "dw") { cfg.delete_after = true; return true; }
+    if (sw_low == "df") { cfg.delete_after = true; cfg.wipe_after = false; cfg.recycle_after = false; return true; }
+    if (sw_low == "dr") { cfg.delete_after = true; cfg.recycle_after = true; cfg.wipe_after = false; return true; }
+    if (sw_low == "dw") { cfg.delete_after = true; cfg.wipe_after = true; cfg.recycle_after = false; return true; }
     if (sw_low == "ed") { cfg.no_empty_dirs = true; return true; }
     if (sw_low == "ac") { cfg.clear_archive_attr = true; return true; }
     if (sw_low == "ai") { cfg.ignore_attributes = true; return true; }
@@ -731,6 +655,21 @@ bool parse_switch(const std::string& sw_raw, CliConfig& cfg, const std::vector<s
     if (sw_low == "cfg-") { return true; }
     if (sw_low == "inul") { cfg.quiet_all = true; return true; }
     if (sw_low == "ierr") { cfg.msg_to_stderr = true; return true; }
+    if (sw_low == "isnd") { cfg.beep_when_done = true; return true; }
+    if (sw_low.substr(0, 4) == "ioff") {
+        cfg.power_off = 1;
+        if (sw_low.size() > 4 && std::isdigit(static_cast<unsigned char>(sw_low[4]))) {
+            cfg.power_off = sw_low[4] - '0';
+        }
+        if (cfg.power_off < 1 || cfg.power_off > 4) cfg.power_off = 1;
+        return true;
+    }
+    if (sw_low.substr(0, 4) == "ieml") {
+        std::string rest = sw.substr(4);
+        if (!rest.empty() && rest[0] == '.') rest.erase(rest.begin());
+        cfg.email_to = rest;
+        return true;
+    }
     if (sw_low.substr(0, 2) == "id") {
         for (size_t i = 2; i < sw_low.size(); ++i) {
             if (sw_low[i] == 'c') cfg.quiet_copyright = true;
@@ -766,6 +705,12 @@ bool parse_switch(const std::string& sw_raw, CliConfig& cfg, const std::vector<s
     // Compression level -m0..5 and dictionary -md<size> and store extensions -ms and threads -mt
     if (sw_low.size() == 2 && sw_low[0] == 'm' && sw_low[1] >= '0' && sw_low[1] <= '5') {
         cfg.arch_opts.method = sw_low[1] - '0';
+        cfg.method_explicit = true;
+        return true;
+    }
+    if (sw_low.substr(0, 2) == "ma") {
+        int ver = std::atoi(sw_low.c_str() + 2);
+        if (ver == 4 || ver == 5) cfg.format_version = ver;
         return true;
     }
     if (sw_low.substr(0, 2) == "md") {
@@ -805,15 +750,49 @@ bool parse_switch(const std::string& sw_raw, CliConfig& cfg, const std::vector<s
         }
         return true;
     }
-    if (sw_low.substr(0, 2) == "mt" || sw_low.substr(0, 2) == "mc") {
+    if (sw_low.substr(0, 2) == "mt") {
+        std::string n = sw_low.substr(2);
+        if (!n.empty() && n[0] == '=') n.erase(n.begin());
+        cfg.threads = std::max(1, n.empty() ? 1 : std::atoi(n.c_str()));
+        return true;
+    }
+    if (sw_low.substr(0, 2) == "mc") {
         return true;
     }
 
-    // Solid switches (-s, -s-, -se, -sv, -sv-)
-    if (sw_low == "s-") { cfg.arch_opts.solid = false; return true; }
-    if (sw_low == "s" || sw_low == "se" || sw_low == "sv" || sw_low == "sv-" ||
-        (sw_low.size() > 1 && sw_low[0] == 's' && std::isdigit((unsigned char)sw_low[1]))) {
+    // Solid switches (-s, -s-, -sN, -se, -sv, -sv-, -sc)
+    if (sw_low == "s-") { cfg.arch_opts.solid = false; cfg.solid_explicit = true; return true; }
+    if (sw_low.substr(0, 2) == "sc") {
+        std::string rest = sw_low.substr(2);
+        if (!rest.empty()) {
+            cfg.charset = rest[0];
+            cfg.charset_objects = rest.substr(1);
+        }
+        return true;
+    }
+    if (sw_low == "se") {
         cfg.arch_opts.solid = true;
+        cfg.solid_by_extension = true;
+        cfg.solid_explicit = true;
+        return true;
+    }
+    if (sw_low == "sv") {
+        cfg.arch_opts.solid = true;
+        cfg.independent_volumes = true;
+        cfg.solid_explicit = true;
+        return true;
+    }
+    if (sw_low == "sv-") {
+        cfg.arch_opts.solid = true;
+        cfg.independent_volumes = false;
+        cfg.solid_explicit = true;
+        return true;
+    }
+    if (sw_low == "s") { cfg.arch_opts.solid = true; cfg.solid_explicit = true; return true; }
+    if (sw_low.size() > 1 && sw_low[0] == 's' && std::isdigit(static_cast<unsigned char>(sw_low[1]))) {
+        cfg.arch_opts.solid = true;
+        cfg.solid_explicit = true;
+        cfg.solid_files = std::max(1, std::atoi(sw_low.substr(1).c_str()));
         return true;
     }
 
@@ -821,25 +800,36 @@ bool parse_switch(const std::string& sw_raw, CliConfig& cfg, const std::vector<s
     if (sw_low == "htb") { cfg.arch_opts.use_blake2sp = true; return true; }
     if (sw_low == "htc") { cfg.arch_opts.use_blake2sp = false; return true; }
 
-    // Password (-p[pwd], -hp[pwd])
+    // Password (-p[pwd], -hp[pwd]). A bare -p or -hp asks on a terminal.
+    if (sw_low == "hp" || sw_low == "p") {
+        if (sw_low == "hp") cfg.arch_opts.encrypt_headers = true;
+        cfg.arch_opts.password.clear();
+        cfg.prompt_password = true;
+        return true;
+    }
     if (sw_low.substr(0, 2) == "hp") {
         cfg.arch_opts.encrypt_headers = true;
         cfg.arch_opts.password = sw.substr(2);
+        cfg.prompt_password = cfg.arch_opts.password.empty();
         return true;
     }
     if (sw_low[0] == 'p' || sw[0] == 'P') {
         cfg.arch_opts.password = sw.substr(1);
+        cfg.prompt_password = cfg.arch_opts.password.empty();
         return true;
     }
 
-    // Recovery record (-rr[N], -rv[N])
-    if (sw_low.substr(0, 2) == "rr" || sw_low.substr(0, 2) == "rv") {
+    // Recovery record (-rr[N]) and recovery volumes (-rv[N])
+    if (sw_low.substr(0, 2) == "rr") {
         std::string rstr = sw_low.substr(2);
         int pct = 3;
-        if (!rstr.empty()) {
-            pct = std::max(1, std::atoi(rstr.c_str()));
-        }
+        if (!rstr.empty()) pct = std::max(1, std::atoi(rstr.c_str()));
         cfg.arch_opts.recovery_percent = pct;
+        return true;
+    }
+    if (sw_low.substr(0, 2) == "rv") {
+        std::string rstr = sw_low.substr(2);
+        cfg.recovery_volumes = rstr.empty() ? 1 : std::max(1, std::atoi(rstr.c_str()));
         return true;
     }
 
@@ -855,6 +845,10 @@ bool parse_switch(const std::string& sw_raw, CliConfig& cfg, const std::vector<s
         cfg.sfx_stub_name = sw.substr(3);
         return true;
     }
+
+    if (sw_low == "vn") { cfg.arch_opts.old_volume_names = true; return true; }
+    if (sw_low == "vp") { cfg.pause_volumes = true; return true; }
+    if (sw_low == "vd") { return true; }
 
     // Volume size (-v<size>[u])
     if (sw_low[0] == 'v' && sw_low.substr(0, 3) != "ver") {
@@ -910,7 +904,7 @@ bool parse_switch(const std::string& sw_raw, CliConfig& cfg, const std::vector<s
 
     // Include & Exclude masks (-n, -n@, -x, -x@)
     if (sw_low.substr(0, 2) == "n@") {
-        read_list_file(sw.substr(2), cfg.include_masks);
+        read_list_file(sw.substr(2), cfg.include_masks, charset_applies(cfg, 'l') ? cfg.charset : 0);
         return true;
     }
     if (sw_low[0] == 'n' && sw.size() > 1) {
@@ -918,7 +912,7 @@ bool parse_switch(const std::string& sw_raw, CliConfig& cfg, const std::vector<s
         return true;
     }
     if (sw_low.substr(0, 2) == "x@") {
-        read_list_file(sw.substr(2), cfg.exclude_masks);
+        read_list_file(sw.substr(2), cfg.exclude_masks, charset_applies(cfg, 'l') ? cfg.charset : 0);
         return true;
     }
     if (sw_low[0] == 'x' && sw.size() > 1) {
@@ -949,7 +943,7 @@ bool is_known_command(const std::string& token, CliConfig& cfg) {
     }
     if (low.substr(0, 2) == "rv" && (low.size() == 2 || std::isdigit((unsigned char)low[2]))) {
         cfg.command = "rv";
-        cfg.arch_opts.recovery_percent = (low.size() > 2) ? std::max(1, std::atoi(low.substr(2).c_str())) : 3;
+        cfg.recovery_volumes = (low.size() > 2) ? std::max(1, std::atoi(low.substr(2).c_str())) : 1;
         return true;
     }
     if (low[0] == 's' && low != "s-") {
@@ -969,6 +963,122 @@ bool is_known_command(const std::string& token, CliConfig& cfg) {
     return false;
 }
 
+std::vector<std::string> load_config_tokens(const std::string& exe_path) {
+    std::vector<std::string> tokens;
+    auto take_file = [&](const std::string& path) {
+        std::ifstream in(make_fspath(path), std::ios::binary);
+        if (!in) return;
+        std::string line;
+        while (std::getline(in, line)) {
+            if (!line.empty() && line.back() == '\r') line.pop_back();
+            size_t i = 0;
+            while (i < line.size() && (line[i] == ' ' || line[i] == '\t')) ++i;
+            if (i >= line.size() || line[i] == '#' || line[i] == ';') continue;
+            std::string cur;
+            bool quote = false;
+            for (; i < line.size(); ++i) {
+                char ch = line[i];
+                if (ch == '"') { quote = !quote; continue; }
+                if (!quote && (ch == ' ' || ch == '\t')) {
+                    if (!cur.empty()) { tokens.push_back(cur); cur.clear(); }
+                } else {
+                    cur.push_back(ch);
+                }
+            }
+            if (!cur.empty()) tokens.push_back(cur);
+        }
+    };
+    for (const auto& path : config_file_candidates(exe_path)) take_file(path);
+    std::string env = getenv_utf8("RAR");
+    if (!env.empty()) {
+        std::string cur;
+        bool quote = false;
+        for (size_t i = 0; i <= env.size(); ++i) {
+            char ch = (i == env.size()) ? ' ' : env[i];
+            if (ch == '"') { quote = !quote; continue; }
+            if (!quote && (ch == ' ' || ch == '\t')) {
+                if (!cur.empty()) { tokens.push_back(cur); cur.clear(); }
+            } else {
+                cur.push_back(ch);
+            }
+        }
+    }
+    return tokens;
+}
+
+void maybe_prompt_password(CliConfig& cfg) {
+    if (!cfg.prompt_password || !cfg.arch_opts.password.empty()) return;
+    if (!stdin_is_tty()) return;
+    cfg.arch_opts.password = prompt_line(msg("action.password"), true);
+}
+
+RarExitCode store_archive(const CliConfig& cfg, RarArchive& arch, const std::string& final_path,
+                          const RarArchiveOptions& opts, std::vector<std::string>* volumes,
+                          std::string* err) {
+    std::error_code ec;
+    bool keep_time = false;
+    fs::file_time_type old_time{};
+    if (cfg.keep_archive_time && fs::exists(make_fspath(final_path), ec)) {
+        old_time = fs::last_write_time(make_fspath(final_path), ec);
+        keep_time = !ec;
+    }
+    std::string save_path = final_path;
+    if (!cfg.work_dir.empty()) {
+        fs::create_directories(make_fspath(cfg.work_dir), ec);
+        save_path = path_join(cfg.work_dir, fspath_to_utf8(make_fspath(final_path).filename()));
+    }
+    if (cfg.pause_volumes) {
+        arch.before_volume = [&cfg](const std::string& vol) {
+            if (stdin_is_tty()) prompt_line(msgf("action.pause_volume", vol), false);
+            return true;
+        };
+    }
+    std::vector<std::string> created;
+    RarExitCode rc = arch.save(save_path, opts, &created, err);
+    if (rc != RAR_EXIT_SUCCESS) return rc;
+    if (save_path != final_path) {
+        fs::path dest_dir = make_fspath(final_path).parent_path();
+        std::vector<std::string> moved;
+        for (const auto& v : created) {
+            fs::path src = make_fspath(v);
+            fs::path dst = dest_dir.empty() ? src.filename() : (dest_dir / src.filename());
+            std::error_code rec;
+            if (dst.has_parent_path()) fs::create_directories(dst.parent_path(), rec);
+            fs::rename(src, dst, rec);
+            if (rec) {
+                rec.clear();
+                fs::copy_file(src, dst, fs::copy_options::overwrite_existing, rec);
+                fs::remove(src, rec);
+            }
+            moved.push_back(fspath_to_utf8(dst));
+        }
+        created.swap(moved);
+    }
+    if (cfg.create_sfx || cfg.command == "s") {
+        for (const auto& v : created) make_executable(v);
+    }
+    if (keep_time) {
+        for (const auto& v : created) fs::last_write_time(make_fspath(v), old_time, ec);
+    }
+    if (cfg.recovery_volumes > 0 && !created.empty()) {
+        std::vector<std::string> revs;
+        std::string rerr;
+        if (write_recovery_volumes(created, cfg.recovery_volumes, opts.old_volume_names, revs, &rerr)) {
+            for (const auto& rv : revs) out_println(cfg, msgf("action.rev_write", rv));
+        } else if (!rerr.empty()) {
+            err_println(cfg, rerr);
+        }
+    }
+    if (!cfg.email_to.empty() && !created.empty()) {
+        if (open_mail_composer(cfg.email_to, created.front()))
+            out_println(cfg, msgf("action.email", cfg.email_to));
+        else
+            err_println(cfg, msgf("action.email_missing", cfg.email_to));
+    }
+    if (volumes) *volumes = std::move(created);
+    return RAR_EXIT_SUCCESS;
+}
+
 // ============================================================================
 // Command Implementations
 // ============================================================================
@@ -982,7 +1092,7 @@ int cmd_list(const CliConfig& cfg) {
     std::string err_msg;
     RarExitCode rc = arch.load(arch_path, cfg.arch_opts.password, &err_msg);
     if (rc != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "错误: " + err_msg + " (" + arch_path + ")");
+        err_println(cfg, msgf("err.with_path", err_msg, arch_path));
         return (int)rc;
     }
 
@@ -1004,44 +1114,44 @@ int cmd_list(const CliConfig& cfg) {
         out_println(cfg, "");
     }
 
-    out_println(cfg, "压缩文件: " + to_native_slashes(arch_path));
-    std::string details = "详情: RAR 5";
-    if (arch.is_solid) details += ", 固实";
-    if (arch.has_recovery) details += ", 恢复记录";
-    if (arch.is_locked) details += ", 锁定";
-    if (arch.headers_encrypted) details += ", 加密标头";
-    if (!arch.sfx_stub.empty()) details += ", 自解压";
-    if (arch.is_volume) details += ", 卷";
+    out_println(cfg, msgf("list.archive", to_native_slashes(arch_path)));
+    std::string details = msg("list.details");
+    if (arch.is_solid) details += msg("list.solid");
+    if (arch.has_recovery) details += msg("list.recovery");
+    if (arch.is_locked) details += msg("list.locked");
+    if (arch.headers_encrypted) details += msg("list.enc_hdr");
+    if (!arch.sfx_stub.empty()) details += msg("list.sfx");
+    if (arch.is_volume) details += msg("list.volume");
     out_println(cfg, details);
     out_println(cfg, "");
 
     if (tech) {
         for (const auto& e : arch.entries) {
             if (!matches_entry_filters(cfg, e.name, e.unpacked_size, e.mtime_winft)) continue;
-            out_println(cfg, "        名称: " + to_native_slashes(e.name));
-            out_println(cfg, std::string("        类型: ") + (e.is_dir ? "目录" : "文件"));
+            out_println(cfg, msgf("list.name", to_native_slashes(e.name)));
+            out_println(cfg, msgf("list.type", e.is_dir ? msg("list.type_dir") : msg("list.type_file")));
             if (!e.is_dir) {
-                out_println(cfg, "        大小: " + std::to_string(e.unpacked_size));
-                out_println(cfg, "  打包后大小: " + std::to_string(e.packed_size));
+                out_println(cfg, msgf("list.size", std::to_string(e.unpacked_size)));
+                out_println(cfg, msgf("list.packed", std::to_string(e.packed_size)));
                 int ratio = (e.unpacked_size > 0)
                                 ? (int)((e.packed_size * 100ULL) / e.unpacked_size)
                                 : 0;
-                out_println(cfg, "      压缩率: " + std::to_string(ratio) + "%");
+                out_println(cfg, msgf("list.ratio", std::to_string(ratio)));
             }
             std::string d_str, t_str, full_ns;
             if (e.mtime_winft != 0) {
                 format_winft_datetime(e.mtime_winft, d_str, t_str, &full_ns);
-                out_println(cfg, "    修改时间: " + full_ns);
+                out_println(cfg, msgf("list.mtime", full_ns));
             }
             if (e.ctime_winft != 0) {
                 format_winft_datetime(e.ctime_winft, d_str, t_str, &full_ns);
-                out_println(cfg, "    创建时间: " + full_ns);
+                out_println(cfg, msgf("list.ctime", full_ns));
             }
             if (e.atime_winft != 0) {
                 format_winft_datetime(e.atime_winft, d_str, t_str, &full_ns);
-                out_println(cfg, "    访问时间: " + full_ns);
+                out_println(cfg, msgf("list.atime", full_ns));
             }
-            out_println(cfg, "        属性: " + format_attributes(e));
+            out_println(cfg, msgf("list.attr", format_attributes(e)));
             if (e.has_blake2sp) {
                 std::ostringstream hs;
                 hs << std::hex << std::setfill('0');
@@ -1050,15 +1160,14 @@ int cmd_list(const CliConfig& cfg) {
             } else if (e.has_crc32) {
                 char cbuf[16];
                 std::snprintf(cbuf, sizeof(cbuf), "%08X", e.crc32);
-                out_println(cfg, std::string("       CRC32: ") + cbuf);
+                out_println(cfg, msgf("list.crc", cbuf));
             }
-            out_println(cfg, std::string("     主机 OS: ") + (e.host_os == HOST5_WINDOWS ? "Windows" : "Unix"));
+            out_println(cfg, msgf("list.host", e.host_os == HOST5_WINDOWS ? msg("host.windows") : msg("host.unix")));
             uint64_t dict_kb = 128ULL << e.dict_bits;
             std::string dict_str = (dict_kb >= 1024) ? (std::to_string(dict_kb / 1024) + "m") : (std::to_string(dict_kb) + "k");
-            out_println(cfg, "        压缩: RAR 5.0(v50) -m" + std::to_string(e.comp_method) +
-                             " -md=" + dict_str + (e.solid ? " 固实" : ""));
+            out_println(cfg, msgf("list.comp", std::to_string(e.comp_method), dict_str) + (e.solid ? msg("list.solid_word") : ""));
             if (e.encrypted || arch.headers_encrypted) {
-                out_println(cfg, "        密码: 是 (AES-256)");
+                out_println(cfg, msg("list.password"));
             }
             out_println(cfg, "");
         }
@@ -1066,11 +1175,11 @@ int cmd_list(const CliConfig& cfg) {
     }
 
     if (verbose) {
-        out_println(cfg, " 属性            大小    已压缩  比率   日期       时间     校验和   名称");
-        out_println(cfg, "----------- ---------  -------- ----- ---------- -----  --------  ----");
+        out_println(cfg, msg("list.hdr_verbose"));
+        out_println(cfg, msg("list.rule_verbose"));
     } else {
-        out_println(cfg, " 属性            大小    日期       时间   名称");
-        out_println(cfg, "----------- ---------  ---------- -----  ----");
+        out_println(cfg, msg("list.hdr_brief"));
+        out_println(cfg, msg("list.rule_brief"));
     }
 
     uint64_t total_unp = 0;
@@ -1122,14 +1231,14 @@ int cmd_list(const CliConfig& cfg) {
     }
 
     if (verbose) {
-        out_println(cfg, "----------- ---------  -------- ----- ---------- -----  --------  ----");
+        out_println(cfg, msg("list.rule_verbose"));
         int total_ratio = (total_unp > 0) ? (int)((total_pck * 100ULL) / total_unp) : 0;
         char sline[256];
         std::snprintf(sline, sizeof(sline), "            %9llu  %8llu %4d%%                             %zu",
                       (unsigned long long)total_unp, (unsigned long long)total_pck, total_ratio, count);
         out_println(cfg, sline);
     } else {
-        out_println(cfg, "----------- ---------  ---------- -----  ----");
+        out_println(cfg, msg("list.rule_brief"));
         char sline[256];
         std::snprintf(sline, sizeof(sline), "            %9llu                    %zu",
                       (unsigned long long)total_unp, count);
@@ -1149,7 +1258,7 @@ int cmd_test(const CliConfig& cfg) {
     std::string err_msg;
     RarExitCode rc = arch.load(arch_path, cfg.arch_opts.password, &err_msg);
     if (rc != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "错误: " + err_msg);
+        err_println(cfg, msgf("err.generic", err_msg));
         return (int)rc;
     }
 
@@ -1158,7 +1267,7 @@ int cmd_test(const CliConfig& cfg) {
         out_println(cfg, "");
     }
 
-    out_println(cfg, "正在测试压缩文件 " + to_native_slashes(arch_path));
+    out_println(cfg, msgf("action.testing", to_native_slashes(arch_path)));
     out_println(cfg, "");
 
     Rar5Decompressor decomp;
@@ -1175,24 +1284,24 @@ int cmd_test(const CliConfig& cfg) {
 
         if (erc == RAR_EXIT_SUCCESS) {
             if (!cfg.quiet_names) {
-                out_println(cfg, "正在测试     " + to_native_slashes(e.name) + "                                                   完成");
+                out_println(cfg, msgf("action.testing_file", to_native_slashes(e.name), msg("status.ok")));
             }
         } else {
-            err_println(cfg, "测试失败     " + to_native_slashes(e.name) + ": " + extr_err);
+            err_println(cfg, msgf("err.test", to_native_slashes(e.name), extr_err));
             ++err_count;
         }
     }
 
     if (err_count == 0) {
-        if (!cfg.quiet_done) out_println(cfg, "全部正常");
+        if (!cfg.quiet_done) out_println(cfg, msg("status.all_ok"));
         return RAR_EXIT_SUCCESS;
     } else {
-        err_println(cfg, "总共错误: " + std::to_string(err_count));
+        err_println(cfg, msgf("err.total", std::to_string(err_count)));
         return RAR_EXIT_CRC_ERROR;
     }
 }
 
-int cmd_extract_or_print(const CliConfig& cfg, const std::string& self_sfx_path = "") {
+int cmd_extract_or_print(CliConfig& cfg, const std::string& self_sfx_path = "") {
     bool is_print = (cfg.command == "p");
     bool full_paths = (cfg.command == "x") && (cfg.ep_mode != 0);
 
@@ -1209,7 +1318,7 @@ int cmd_extract_or_print(const CliConfig& cfg, const std::string& self_sfx_path 
     std::string err_msg;
     RarExitCode rc = arch.load(arch_path, cfg.arch_opts.password, &err_msg);
     if (rc != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "错误: " + err_msg);
+        err_println(cfg, msgf("err.generic", err_msg));
         return (int)rc;
     }
 
@@ -1218,7 +1327,7 @@ int cmd_extract_or_print(const CliConfig& cfg, const std::string& self_sfx_path 
             out_println(cfg, arch.comment);
             out_println(cfg, "");
         }
-        out_println(cfg, "正在从 " + to_native_slashes(arch_path) + " 解压");
+        out_println(cfg, msgf("action.extracting_from", to_native_slashes(arch_path)));
         out_println(cfg, "");
     }
 
@@ -1247,7 +1356,7 @@ int cmd_extract_or_print(const CliConfig& cfg, const std::string& self_sfx_path 
         if (!selected) continue;
 
         if (erc != RAR_EXIT_SUCCESS && !cfg.keep_broken) {
-            err_println(cfg, "解压错误 " + to_native_slashes(e.name) + ": " + extr_err);
+            err_println(cfg, msgf("err.extract", to_native_slashes(e.name), extr_err));
             return (int)erc;
         }
 
@@ -1280,13 +1389,13 @@ int cmd_extract_or_print(const CliConfig& cfg, const std::string& self_sfx_path 
 
         fs::path out_path = base_out.empty() ? rel_path : (base_out / rel_path);
 
-        if (e.is_dir) {
+        if (e.is_dir && e.redir_type == REDIR5_NONE) {
             if (full_paths) {
                 std::error_code ec;
                 fs::create_directories(out_path, ec);
                 apply_extracted_times_and_attrs(out_path, e, cfg);
                 if (!cfg.quiet_names) {
-                    out_println(cfg, "正在创建    " + fspath_to_utf8(out_path) + "                                                     完成");
+                    out_println(cfg, msgf("action.creating_dir", fspath_to_utf8(out_path), msg("status.ok")));
                 }
             }
             continue;
@@ -1298,8 +1407,34 @@ int cmd_extract_or_print(const CliConfig& cfg, const std::string& self_sfx_path 
         }
 
         if (fs::exists(out_path)) {
+            if (cfg.extract_newer) {
+                std::error_code tec;
+                auto disk_time = fs::last_write_time(out_path, tec);
+                if (!tec && e.mtime_winft != 0) {
+                    int64_t sec = 0;
+                    uint32_t nsec = 0;
+                    win_filetime_to_unix(e.mtime_winft, sec, nsec);
+                    auto arch_time = std::chrono::system_clock::from_time_t((std::time_t)sec);
+                    auto disk_sys = std::chrono::time_point_cast<std::chrono::seconds>(
+                        disk_time - fs::file_time_type::clock::now() + std::chrono::system_clock::now());
+                    if (disk_sys >= arch_time) continue;
+                }
+            }
             if (cfg.overwrite_mode == -1) {
                 continue; // -o- skip existing
+            }
+            if (cfg.overwrite_mode == 0 && !cfg.auto_rename) {
+                int ans = 0;
+                if (!stdin_is_tty()) ans = -1;
+                else {
+                    std::string line = prompt_line(msgf("action.overwrite", fspath_to_utf8(out_path)), false);
+                    char ch = line.empty() ? 'n' : (char)std::tolower((unsigned char)line[0]);
+                    if (ch == 'y') ans = 1;
+                    else if (ch == 'a') { cfg.overwrite_mode = 1; ans = 1; }
+                    else if (ch == 'q') return RAR_EXIT_USER_BREAK;
+                    else ans = -1;
+                }
+                if (ans < 0) continue;
             }
             if (cfg.auto_rename) {
                 // -or auto-rename to filename(1).ext
@@ -1313,29 +1448,46 @@ int cmd_extract_or_print(const CliConfig& cfg, const std::string& self_sfx_path 
             }
         }
 
-        std::ofstream fout(out_path, std::ios::binary | std::ios::trunc);
-        if (!fout) {
-            err_println(cfg, "无法创建文件 " + fspath_to_utf8(out_path));
-            return RAR_EXIT_CREATE_ERROR;
+        bool linked = false;
+        if (e.redir_type == REDIR5_UNIXSYMLINK || e.redir_type == REDIR5_WINSYMLINK) {
+            bool as_dir = e.is_dir;
+            linked = create_symlink_utf8(e.redir_target, fspath_to_utf8(out_path), as_dir);
+        } else if (e.redir_type == REDIR5_HARDLINK || e.redir_type == REDIR5_FILECOPY) {
+            std::string target_rel = e.redir_target;
+            fs::path target_rel_path;
+            for (const auto& part : make_fspath(target_rel)) {
+                std::string ps = fspath_to_utf8(part);
+                if (ps == ".." || ps == "." || ps.find(':') != std::string::npos) continue;
+                target_rel_path /= part;
+            }
+            fs::path target_abs = base_out.empty() ? target_rel_path : (base_out / target_rel_path);
+            linked = create_hardlink_utf8(fspath_to_utf8(target_abs), fspath_to_utf8(out_path));
         }
-        if (!out_data.empty()) {
-            fout.write(reinterpret_cast<const char*>(out_data.data()), (std::streamsize)out_data.size());
+        if (!linked) {
+            std::ofstream fout(out_path, std::ios::binary | std::ios::trunc);
+            if (!fout) {
+                err_println(cfg, msgf("err.create_file", fspath_to_utf8(out_path)));
+                return RAR_EXIT_CREATE_ERROR;
+            }
+            if (!out_data.empty()) {
+                fout.write(reinterpret_cast<const char*>(out_data.data()), (std::streamsize)out_data.size());
+            }
+            fout.close();
         }
-        fout.close();
 
         apply_extracted_times_and_attrs(out_path, e, cfg);
 
         if (!cfg.quiet_names) {
-            out_println(cfg, "正在解压    " + fspath_to_utf8(out_path) + "                                                    完成");
+            out_println(cfg, msgf("action.extracting", fspath_to_utf8(out_path), msg("status.ok")));
         }
         ++extracted_count;
     }
 
     if (!is_print) {
         if (extracted_count == 0 && !arch.entries.empty()) {
-            out_println(cfg, "没有文件可解压");
+            out_println(cfg, msg("action.no_files_extract"));
         } else if (!cfg.quiet_done) {
-            out_println(cfg, "全部正常");
+            out_println(cfg, msg("status.all_ok"));
         }
     }
     return RAR_EXIT_SUCCESS;
@@ -1356,11 +1508,11 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
         std::string err_msg;
         RarExitCode rc = arch.load(arch_path, cfg.arch_opts.password, &err_msg);
         if (rc != RAR_EXIT_SUCCESS) {
-            err_println(cfg, "错误: " + err_msg);
+            err_println(cfg, msgf("err.generic", err_msg));
             return (int)rc;
         }
         if (arch.is_locked) {
-            err_println(cfg, "错误: 压缩文件已锁定，无法修改");
+            err_println(cfg, msg("err.locked_modify"));
             return RAR_EXIT_LOCKED;
         }
         updating_existing = true;
@@ -1372,19 +1524,20 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
     }
 
     if (!cfg.comment_file.empty()) {
-        out_println(cfg, "正在从 " + cfg.comment_file + " 读取注释");
+        out_println(cfg, msgf("action.reading_comment", cfg.comment_file));
         std::ifstream cf(make_fspath(cfg.comment_file), std::ios::binary);
         if (cf) {
             arch.comment.assign((std::istreambuf_iterator<char>(cf)), std::istreambuf_iterator<char>());
+            if (charset_applies(cfg, 'c')) arch.comment = decode_text(arch.comment, cfg.charset);
         }
     }
 
     if (updating_existing) {
-        out_println(cfg, "正在更新压缩文件 " + to_native_slashes(arch_path));
+        out_println(cfg, msgf("action.updating", to_native_slashes(arch_path)));
     } else if (cfg.create_sfx) {
-        out_println(cfg, "正在创建自解压压缩文件 " + to_native_slashes(arch_path));
+        out_println(cfg, msgf("action.creating_sfx", to_native_slashes(arch_path)));
     } else {
-        out_println(cfg, "正在创建压缩文件 " + to_native_slashes(arch_path));
+        out_println(cfg, msgf("action.creating", to_native_slashes(arch_path)));
     }
     out_println(cfg, "");
 
@@ -1392,6 +1545,15 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
         fs::path    disk_path;
         std::string internal_name;
         bool        is_dir = false;
+        bool        is_link = false;
+        uint64_t    redir_type = REDIR5_NONE;
+        std::string link_target;
+        bool        has_owner = false;
+        std::string owner_user;
+        std::string owner_group;
+        uint32_t    owner_uid = 0;
+        uint32_t    owner_gid = 0;
+        uint64_t    host_os = 0;
         uint64_t    size = 0;
         uint64_t    mtime_winft = 0;
         uint64_t    ctime_winft = 0;
@@ -1399,6 +1561,14 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
         uint64_t    attrs = 0x20;
     };
     std::vector<CandidateFile> candidates;
+    struct InodeKey {
+        uint64_t dev = 0;
+        uint64_t ino = 0;
+        bool operator<(const InodeKey& o) const {
+            return dev < o.dev || (dev == o.dev && ino < o.ino);
+        }
+    };
+    std::map<InodeKey, std::string> hardlink_names;
     std::vector<fs::path> paths_to_delete_after;
 
     // Handle -si[name] (read from stdin)
@@ -1418,7 +1588,7 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
                                    false, 0x20, now_ft, now_ft, now_ft,
                                    cfg.arch_opts, comp, false);
         if (!cfg.quiet_names) {
-            out_println(cfg, "正在添加    " + cfg.stdin_name + "                                                    完成");
+            out_println(cfg, msgf("action.adding", cfg.stdin_name, msg("status.ok")));
         }
     } else {
         // Expand file_args and @listfiles
@@ -1428,7 +1598,7 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
         std::vector<std::string> expanded_args;
         for (const auto& arg : raw_inputs) {
             if (!arg.empty() && arg[0] == '@' && !fs::exists(make_fspath(arg))) {
-                read_list_file(arg.substr(1), expanded_args);
+                read_list_file(arg.substr(1), expanded_args, charset_applies(cfg, 'l') ? cfg.charset : 0);
             } else {
                 expanded_args.push_back(arg);
             }
@@ -1440,18 +1610,19 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
             if (fs::exists(make_fspath(arch_path), ec) && fs::equivalent(p, make_fspath(arch_path), ec)) {
                 return;
             }
-            bool is_d = fs::is_directory(p, ec);
+            OsFileInfo info;
+            uint64_t m_ft = 0, c_ft = 0, a_ft = 0, attrs = 0;
+            get_file_times_and_attrs(p, false, m_ft, c_ft, a_ft, attrs, &info);
+            bool is_link = cfg.save_symlinks && info.is_symlink;
+            bool is_d = !is_link && (info.is_dir || fs::is_directory(p, ec));
             if (is_d && cfg.no_empty_dirs) {
                 if (fs::is_empty(p, ec)) return;
             }
-            uint64_t sz = is_d ? 0 : (uint64_t)fs::file_size(p, ec);
-            uint64_t m_ft = 0, c_ft = 0, a_ft = 0, attrs = 0;
-            get_file_times_and_attrs(p, is_d, m_ft, c_ft, a_ft, attrs);
-
+            if (cfg.archive_attr_only && !is_d && !is_link && !info.archive_bit) return;
+            uint64_t sz = (is_d || is_link) ? 0 : (uint64_t)fs::file_size(p, ec);
             std::string int_name = compute_internal_name(cfg, p, base_arg);
             if (int_name.empty()) return;
 
-            // Check filters (excluding file_args since file_args are the inputs here)
             CliConfig filter_cfg = cfg;
             filter_cfg.file_args.clear();
             if (!matches_entry_filters(filter_cfg, int_name, sz, m_ft)) return;
@@ -1460,11 +1631,36 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
             cf.disk_path = p;
             cf.internal_name = int_name;
             cf.is_dir = is_d;
+            cf.is_link = is_link;
+            cf.host_os = info.host_os;
             cf.size = sz;
             cf.mtime_winft = m_ft;
             cf.ctime_winft = cfg.arch_opts.save_ctime ? c_ft : 0;
             cf.atime_winft = cfg.arch_opts.save_atime ? a_ft : 0;
             cf.attrs = cfg.ignore_attributes ? (is_d ? 0x10 : 0x20) : attrs;
+            if (is_link) {
+                cf.redir_type = (info.host_os == HOST5_UNIX) ? REDIR5_UNIXSYMLINK : REDIR5_WINSYMLINK;
+                cf.link_target = info.link_target;
+                cf.size = info.link_target.size();
+            } else if (cfg.save_hardlinks && !is_d && info.nlink > 1 && info.inode != 0) {
+                InodeKey key{info.dev, info.inode};
+                auto found = hardlink_names.find(key);
+                if (found != hardlink_names.end()) {
+                    cf.is_link = true;
+                    cf.redir_type = REDIR5_HARDLINK;
+                    cf.link_target = found->second;
+                    cf.size = 0;
+                } else {
+                    hardlink_names.emplace(key, int_name);
+                }
+            }
+            if (cfg.save_owner && info.has_owner) {
+                cf.has_owner = true;
+                cf.owner_user = info.user;
+                cf.owner_group = info.group;
+                cf.owner_uid = info.uid;
+                cf.owner_gid = info.gid;
+            }
             candidates.push_back(cf);
         };
 
@@ -1473,7 +1669,10 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
             bool has_wild = (arg.find('*') != std::string::npos || arg.find('?') != std::string::npos);
 
             if (!has_wild && fs::exists(p)) {
-                if (fs::is_directory(p)) {
+                std::error_code sec;
+                if (cfg.save_symlinks && fs::is_symlink(p, sec)) {
+                    add_candidate(p, p);
+                } else if (fs::is_directory(p)) {
                     add_candidate(p, p);
                     if (!cfg.disable_recurse) {
                         std::error_code ec;
@@ -1536,15 +1735,29 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
                 for (const auto& c : candidates) {
                     if (to_lower_ascii(c.internal_name) == to_lower_ascii(e.name)) return false;
                 }
-                out_println(cfg, "正在删除 " + to_native_slashes(e.name));
+                out_println(cfg, msgf("action.deleting", to_native_slashes(e.name)));
                 return true;
             }),
             arch.entries.end());
     }
 
+    struct PendingAdd {
+        CandidateFile c;
+        int existing_idx = -1;
+        std::vector<uint8_t> raw;
+        RarEntryExtra extra;
+        bool use_extra = false;
+        RarArchiveOptions opts;
+    };
+    std::vector<PendingAdd> pending;
+    const bool parallel_ok = cfg.threads > 1 && !cfg.arch_opts.solid && !cfg.version_control;
+
     Rar5Compressor compressor;
     compressor.reset((128ULL * 1024ULL) << cfg.arch_opts.dict_bits);
     bool has_prior_solid_file = false;
+    int solid_index = 0;
+    std::string prev_solid_ext;
+    size_t solid_packed = 0;
 
     for (const auto& c : candidates) {
         // Check update (u) and freshen (f) semantics
@@ -1566,14 +1779,42 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
         }
 
         std::vector<uint8_t> raw_data;
-        if (!c.is_dir) {
-            std::ifstream fin(c.disk_path, std::ios::binary);
-            if (!fin) {
-                err_println(cfg, "无法打开文件 " + fspath_to_utf8(c.disk_path));
+        RarEntryExtra extra;
+        bool use_extra = false;
+        if (c.is_link && c.redir_type == REDIR5_HARDLINK) {
+            extra.redir_type = c.redir_type;
+            extra.redir_target = c.link_target;
+            extra.host_os_set = true;
+            extra.host_os = c.host_os ? c.host_os : HOST5_UNIX;
+            use_extra = true;
+        } else if (c.is_link) {
+            raw_data.assign(c.link_target.begin(), c.link_target.end());
+            extra.redir_type = c.redir_type;
+            extra.redir_target = c.link_target;
+            extra.host_os_set = true;
+            extra.host_os = c.host_os ? c.host_os : HOST5_UNIX;
+            use_extra = true;
+        } else if (!c.is_dir) {
+            if (!read_file_bytes(fspath_to_utf8(c.disk_path), raw_data, cfg.open_shared)) {
+                err_println(cfg, msgf("err.open_file", fspath_to_utf8(c.disk_path)));
                 continue;
             }
-            raw_data.assign((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
         }
+        if (c.has_owner) {
+            extra.has_owner = true;
+            extra.owner_user = c.owner_user;
+            extra.owner_group = c.owner_group;
+            extra.owner_uid = c.owner_uid;
+            extra.owner_gid = c.owner_gid;
+            extra.host_os_set = true;
+            extra.host_os = c.host_os ? c.host_os : extra.host_os;
+            use_extra = true;
+        } else if (c.host_os != 0) {
+            extra.host_os_set = true;
+            extra.host_os = c.host_os;
+            use_extra = true;
+        }
+        const RarEntryExtra* extra_ptr = use_extra ? &extra : nullptr;
 
         // Check if extension is in -ms store list
         RarArchiveOptions entry_opts = cfg.arch_opts;
@@ -1586,6 +1827,32 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
                     break;
                 }
             }
+        }
+
+        bool solid_cont = entry_opts.solid && has_prior_solid_file && !c.is_dir && !c.is_link;
+        if (entry_opts.solid && !c.is_dir && !c.is_link) {
+            std::string ext = to_lower_ascii(fspath_to_utf8(make_fspath(c.internal_name).extension()));
+            if (cfg.solid_by_extension && !prev_solid_ext.empty() && ext != prev_solid_ext) solid_cont = false;
+            if (cfg.solid_files > 0 && solid_index > 0 && (solid_index % cfg.solid_files) == 0) solid_cont = false;
+            if (cfg.independent_volumes && cfg.arch_opts.volume_size > 0 &&
+                solid_packed >= cfg.arch_opts.volume_size) {
+                solid_cont = false;
+                solid_packed = 0;
+            }
+            prev_solid_ext = ext;
+            ++solid_index;
+        }
+
+        if (parallel_ok) {
+            PendingAdd item;
+            item.c = c;
+            item.existing_idx = existing_idx;
+            item.raw = std::move(raw_data);
+            item.extra = extra;
+            item.use_extra = use_extra;
+            item.opts = entry_opts;
+            pending.push_back(std::move(item));
+            continue;
         }
 
         // Handle -ver[n] file versioning
@@ -1604,49 +1871,83 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
             arch.add_entry_from_memory(c.internal_name, raw_data.data(), raw_data.size(),
                                        c.is_dir, c.attrs, c.mtime_winft, c.ctime_winft, c.atime_winft,
                                        entry_opts, compressor,
-                                       entry_opts.solid && has_prior_solid_file && !c.is_dir);
+                                       solid_cont,
+                                       extra_ptr);
             arch.entries[existing_idx].name = orig_name;
         } else {
             arch.add_entry_from_memory(c.internal_name, raw_data.data(), raw_data.size(),
                                        c.is_dir, c.attrs, c.mtime_winft, c.ctime_winft, c.atime_winft,
                                        entry_opts, compressor,
-                                       entry_opts.solid && has_prior_solid_file && !c.is_dir);
+                                       solid_cont,
+                                       extra_ptr);
         }
 
-        if (!c.is_dir && entry_opts.method > 0 && entry_opts.solid) {
+        if (!c.is_dir && !c.is_link && entry_opts.method > 0 && entry_opts.solid) {
             has_prior_solid_file = true;
+            solid_packed += raw_data.size();
         }
+        if (cfg.sleep_ms > 0) std::this_thread::sleep_for(std::chrono::milliseconds(cfg.sleep_ms));
 
         if (!cfg.quiet_names) {
-            std::string action = (existing_idx >= 0) ? "正在更新    " : "正在添加    ";
-            out_println(cfg, action + to_native_slashes(c.internal_name) + "                                                    完成");
+            const char* action_key = (existing_idx >= 0) ? "action.updating_file" : "action.adding";
+            out_println(cfg, msgf(action_key, to_native_slashes(c.internal_name), msg("status.ok")));
         }
 
         if (cfg.delete_after) {
             paths_to_delete_after.push_back(c.disk_path);
         }
-#ifdef _WIN32
-        if (cfg.clear_archive_attr && !c.is_dir) {
-            DWORD cur_a = GetFileAttributesW(c.disk_path.c_str());
-            if (cur_a != INVALID_FILE_ATTRIBUTES) {
-                SetFileAttributesW(c.disk_path.c_str(), cur_a & ~FILE_ATTRIBUTE_ARCHIVE);
-            }
+        if (cfg.clear_archive_attr && !c.is_dir && !c.is_link) {
+            clear_archive_attribute(fspath_to_utf8(c.disk_path));
         }
-#endif
+    }
+
+    if (!pending.empty()) {
+        const int workers = std::max(1, cfg.threads);
+        for (size_t base = 0; base < pending.size();) {
+            size_t batch = std::min(static_cast<size_t>(workers), pending.size() - base);
+            std::vector<std::future<RarFileEntry>> built;
+            built.reserve(batch);
+            for (size_t i = 0; i < batch; ++i) {
+                PendingAdd* item = &pending[base + i];
+                built.push_back(std::async(std::launch::async, [item, &arch]() {
+                    Rar5Compressor comp;
+                    comp.reset((128ULL * 1024ULL) << item->opts.dict_bits);
+                    return arch.build_entry_from_memory(
+                        item->c.internal_name, item->raw.data(), item->raw.size(),
+                        item->c.is_dir, item->c.attrs, item->c.mtime_winft,
+                        item->c.ctime_winft, item->c.atime_winft,
+                        item->opts, comp, false, item->use_extra ? &item->extra : nullptr);
+                }));
+            }
+            for (size_t i = 0; i < batch; ++i) {
+                arch.commit_entry(built[i].get());
+                const CandidateFile& c = pending[base + i].c;
+                if (cfg.sleep_ms > 0) std::this_thread::sleep_for(std::chrono::milliseconds(cfg.sleep_ms));
+                if (!cfg.quiet_names) {
+                    const char* action_key = (pending[base + i].existing_idx >= 0) ? "action.updating_file" : "action.adding";
+                    out_println(cfg, msgf(action_key, to_native_slashes(c.internal_name), msg("status.ok")));
+                }
+                if (cfg.delete_after) paths_to_delete_after.push_back(c.disk_path);
+                if (cfg.clear_archive_attr && !c.is_dir && !c.is_link) {
+                    clear_archive_attribute(fspath_to_utf8(c.disk_path));
+                }
+            }
+            base += batch;
+        }
     }
 
     if (cfg.arch_opts.recovery_percent > 0) {
-        out_println(cfg, "正在添加数据恢复记录");
+        out_println(cfg, msg("action.adding_rr"));
     }
     if (cfg.arch_opts.lock_archive) {
-        out_println(cfg, "正在锁定压缩文件");
+        out_println(cfg, msg("action.locking"));
     }
 
     std::vector<std::string> volumes;
     std::string save_err;
-    RarExitCode src = arch.save(arch_path, cfg.arch_opts, &volumes, &save_err);
+    RarExitCode src = store_archive(cfg, arch, arch_path, cfg.arch_opts, &volumes, &save_err);
     if (src != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "保存错误: " + save_err);
+        err_println(cfg, msgf("err.save", save_err));
         return (int)src;
     }
 
@@ -1679,16 +1980,23 @@ int cmd_add_or_update(const CliConfig& cfg, const std::string& self_exe_path) {
         // Delete files first, then directories in reverse depth order
         std::sort(paths_to_delete_after.begin(), paths_to_delete_after.end(),
                   [](const fs::path& a, const fs::path& b) {
-                      return a.wstring().size() > b.wstring().size();
+                      return a.native().size() > b.native().size();
                   });
         for (const auto& dp : paths_to_delete_after) {
             std::error_code ec;
             if (fs::is_directory(dp, ec) && cfg.move_files_only) continue;
-            fs::remove(dp, ec);
+            std::string utf = fspath_to_utf8(dp);
+            if (cfg.recycle_after) {
+                if (!move_to_trash(utf)) err_println(cfg, msgf("err.trash", utf));
+            } else if (cfg.wipe_after) {
+                wipe_file(utf);
+            } else {
+                fs::remove(dp, ec);
+            }
         }
     }
 
-    if (!cfg.quiet_done) out_println(cfg, "完成");
+    if (!cfg.quiet_done) out_println(cfg, msg("status.done"));
     return RAR_EXIT_SUCCESS;
 }
 
@@ -1702,37 +2010,37 @@ int cmd_delete(const CliConfig& cfg) {
     std::string err_msg;
     RarExitCode rc = arch.load(arch_path, cfg.arch_opts.password, &err_msg);
     if (rc != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "错误: " + err_msg);
+        err_println(cfg, msgf("err.generic", err_msg));
         return (int)rc;
     }
     if (arch.is_locked) {
-        err_println(cfg, "错误: 压缩文件已锁定");
+        err_println(cfg, msg("err.locked"));
         return RAR_EXIT_LOCKED;
     }
 
-    out_println(cfg, "正在更新压缩文件 " + to_native_slashes(arch_path));
+    out_println(cfg, msgf("action.updating", to_native_slashes(arch_path)));
     out_println(cfg, "");
 
     size_t orig_count = arch.entries.size();
     std::vector<RarFileEntry> remaining;
     for (const auto& e : arch.entries) {
         if (matches_entry_filters(cfg, e.name, e.unpacked_size, e.mtime_winft)) {
-            out_println(cfg, "正在删除 " + to_native_slashes(e.name));
+            out_println(cfg, msgf("action.deleting", to_native_slashes(e.name)));
         } else {
             remaining.push_back(e);
         }
     }
 
     if (remaining.size() == orig_count) {
-        out_println(cfg, "没有文件可删除");
+        out_println(cfg, msg("action.no_files_delete"));
         return RAR_EXIT_NO_FILES;
     }
 
     if (remaining.empty()) {
         std::error_code ec;
         fs::remove(make_fspath(arch_path), ec);
-        out_println(cfg, "删除空的压缩文件 " + to_native_slashes(arch_path));
-        if (!cfg.quiet_done) out_println(cfg, "完成");
+        out_println(cfg, msgf("action.delete_empty", to_native_slashes(arch_path)));
+        if (!cfg.quiet_done) out_println(cfg, msg("status.done"));
         return RAR_EXIT_SUCCESS;
     }
 
@@ -1765,19 +2073,19 @@ int cmd_delete(const CliConfig& cfg) {
     RarArchiveOptions sopts = cfg.arch_opts;
     sopts.solid = arch.is_solid;
     sopts.lock_archive = arch.is_locked || cfg.arch_opts.lock_archive;
-    RarExitCode src = arch.save(arch_path, sopts, nullptr, &err_msg);
+    RarExitCode src = store_archive(cfg, arch, arch_path, sopts, nullptr, &err_msg);
     if (src != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "错误: " + err_msg);
+        err_println(cfg, msgf("err.generic", err_msg));
         return (int)src;
     }
-    if (!cfg.quiet_done) out_println(cfg, "完成");
+    if (!cfg.quiet_done) out_println(cfg, msg("status.done"));
     return RAR_EXIT_SUCCESS;
 }
 
 int cmd_rename(const CliConfig& cfg) {
     print_banner(cfg);
     if (cfg.file_args.size() < 2 || (cfg.file_args.size() % 2) != 0) {
-        err_println(cfg, "错误: rn 命令需要成对的 <源文件名> <目标文件名> 参数");
+        err_println(cfg, msg("err.rn_pairs"));
         return RAR_EXIT_USER_ERROR;
     }
     std::string arch_path = ensure_archive_extension(cfg.archive_path, false);
@@ -1788,15 +2096,15 @@ int cmd_rename(const CliConfig& cfg) {
     std::string err_msg;
     RarExitCode rc = arch.load(arch_path, cfg.arch_opts.password, &err_msg);
     if (rc != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "错误: " + err_msg);
+        err_println(cfg, msgf("err.generic", err_msg));
         return (int)rc;
     }
     if (arch.is_locked) {
-        err_println(cfg, "错误: 压缩文件已锁定");
+        err_println(cfg, msg("err.locked"));
         return RAR_EXIT_LOCKED;
     }
 
-    out_println(cfg, "正在更新压缩文件 " + to_native_slashes(arch_path));
+    out_println(cfg, msgf("action.updating", to_native_slashes(arch_path)));
     out_println(cfg, "");
 
     size_t renamed = 0;
@@ -1815,7 +2123,7 @@ int cmd_rename(const CliConfig& cfg) {
                             fspath_to_utf8(ep.parent_path() / ep.stem()) + dst_pat.substr(1));
                     }
                 }
-                out_println(cfg, "正在将 " + to_native_slashes(old_name) + " 重命名为 " + to_native_slashes(new_name));
+                out_println(cfg, msgf("action.renaming", to_native_slashes(old_name), to_native_slashes(new_name)));
                 e.name = new_name;
                 ++renamed;
             }
@@ -1823,18 +2131,18 @@ int cmd_rename(const CliConfig& cfg) {
     }
 
     if (renamed == 0) {
-        out_println(cfg, "没有文件匹配");
+        out_println(cfg, msg("action.no_match"));
         return RAR_EXIT_NO_FILES;
     }
 
     RarArchiveOptions sopts = cfg.arch_opts;
     sopts.solid = arch.is_solid;
-    RarExitCode src = arch.save(arch_path, sopts, nullptr, &err_msg);
+    RarExitCode src = store_archive(cfg, arch, arch_path, sopts, nullptr, &err_msg);
     if (src != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "错误: " + err_msg);
+        err_println(cfg, msgf("err.generic", err_msg));
         return (int)src;
     }
-    if (!cfg.quiet_done) out_println(cfg, "完成");
+    if (!cfg.quiet_done) out_println(cfg, msg("status.done"));
     return RAR_EXIT_SUCCESS;
 }
 
@@ -1845,26 +2153,68 @@ int cmd_comment_or_modify(const CliConfig& cfg, const std::string& self_exe_path
         arch_path = cfg.archive_path;
     }
 
+    if (cfg.command == "rv") {
+        std::vector<std::string> vols;
+        std::string first = locate_first_volume(arch_path);
+        bool old_style = false;
+        std::string second_old = make_volume_name(first, 2, true);
+        std::string second_new = make_volume_name(first, 2, false);
+        if (fs::exists(make_fspath(second_old))) old_style = true;
+        else if (fs::exists(make_fspath(second_new))) old_style = false;
+        else old_style = false;
+        for (size_t i = 1; i < 100000; ++i) {
+            std::string name = make_volume_name(first, i, old_style);
+            if (i == 1 && !fs::exists(make_fspath(name))) name = first;
+            if (!fs::exists(make_fspath(name))) break;
+            vols.push_back(name);
+        }
+        if (vols.empty()) vols.push_back(first);
+        int parity = cfg.recovery_volumes > 0 ? cfg.recovery_volumes : 1;
+        std::vector<std::string> revs;
+        std::string rerr;
+        if (!write_recovery_volumes(vols, parity, old_style, revs, &rerr)) {
+            err_println(cfg, rerr.empty() ? msg("err.rev_write") : rerr);
+            return RAR_EXIT_FATAL;
+        }
+        for (const auto& rv : revs) out_println(cfg, msgf("action.rev_write", rv));
+        if (!cfg.quiet_done) out_println(cfg, msg("status.done"));
+        return RAR_EXIT_SUCCESS;
+    }
+
+    if (cfg.command == "rc") {
+        std::vector<std::string> restored;
+        std::string rc_err;
+        if (!reconstruct_missing_volumes(arch_path, restored, &rc_err)) {
+            err_println(cfg, rc_err.empty() ? msg("err.rev") : rc_err);
+            return RAR_EXIT_FATAL;
+        }
+        for (const auto& name : restored) {
+            out_println(cfg, msgf("action.rev_restore", to_native_slashes(name)));
+        }
+        if (!cfg.quiet_done) out_println(cfg, msg("status.done"));
+        return RAR_EXIT_SUCCESS;
+    }
+
     if (cfg.command == "r" || cfg.command == "rc") {
         // Repair archive
         fs::path ap = make_fspath(arch_path);
         fs::path fixed_path = ap.parent_path() / make_fspath("fixed." + fspath_to_utf8(ap.filename()));
-        out_println(cfg, "正在修复压缩文件 " + to_native_slashes(arch_path));
-        out_println(cfg, "正在重建 " + fspath_to_utf8(fixed_path));
+        out_println(cfg, msgf("action.repairing", to_native_slashes(arch_path)));
+        out_println(cfg, msgf("action.rebuilding", fspath_to_utf8(fixed_path)));
         std::vector<std::string> found_names;
         bool used_rr = false;
         RarExitCode rrc = RarArchive::repair_archive(arch_path, fspath_to_utf8(fixed_path),
                                                      cfg.arch_opts.password, found_names, used_rr);
         if (used_rr) {
-            out_println(cfg, "发现数据恢复记录");
+            out_println(cfg, msg("action.found_rr"));
         }
         for (const auto& fn : found_names) {
-            out_println(cfg, "发现 " + to_native_slashes(fn));
+            out_println(cfg, msgf("action.found", to_native_slashes(fn)));
         }
         if (rrc == RAR_EXIT_SUCCESS) {
-            out_println(cfg, "已完成");
+            out_println(cfg, msg("action.repair_done"));
         } else {
-            err_println(cfg, "修复失败: 未找到有效的 RAR 5.0 文件记录");
+            err_println(cfg, msg("err.repair"));
         }
         return (int)rrc;
     }
@@ -1873,13 +2223,13 @@ int cmd_comment_or_modify(const CliConfig& cfg, const std::string& self_exe_path
     std::string err_msg;
     RarExitCode rc = arch.load(arch_path, cfg.arch_opts.password, &err_msg);
     if (rc != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "错误: " + err_msg);
+        err_println(cfg, msgf("err.generic", err_msg));
         return (int)rc;
     }
 
     if (cfg.command == "cw") {
         if (cfg.file_args.empty()) {
-            err_println(cfg, "错误: cw 命令需要指定输出注释文件名");
+            err_println(cfg, msg("err.cw_needs_file"));
             return RAR_EXIT_USER_ERROR;
         }
         std::string out_cfile = cfg.file_args[0];
@@ -1888,12 +2238,12 @@ int cmd_comment_or_modify(const CliConfig& cfg, const std::string& self_exe_path
         }
         std::ofstream cf(make_fspath(out_cfile), std::ios::binary | std::ios::trunc);
         if (!cf) {
-            err_println(cfg, "无法创建注释文件 " + out_cfile);
+            err_println(cfg, msgf("err.create_comment", out_cfile));
             return RAR_EXIT_CREATE_ERROR;
         }
         cf.write(arch.comment.data(), (std::streamsize)arch.comment.size());
         cf.close();
-        out_println(cfg, "正在将注释写入 " + out_cfile + "                                                完成");
+        out_println(cfg, msgf("action.writing_comment", out_cfile, msg("status.ok")));
         return RAR_EXIT_SUCCESS;
     }
 
@@ -1912,8 +2262,8 @@ int cmd_comment_or_modify(const CliConfig& cfg, const std::string& self_exe_path
                 size_t pos = search_in.find(needle);
                 if (pos != std::string::npos) {
                     out_println(cfg, "");
-                    out_println(cfg, "正在处理 " + to_native_slashes(arch_path));
-                    out_println(cfg, "在 " + to_native_slashes(e.name) + " 中找到匹配:");
+                    out_println(cfg, msgf("action.processing", to_native_slashes(arch_path)));
+                    out_println(cfg, msgf("action.found_in", to_native_slashes(e.name)));
                     // Print matching line
                     size_t ls = haystack.rfind('\n', pos);
                     ls = (ls == std::string::npos) ? 0 : (ls + 1);
@@ -1927,7 +2277,7 @@ int cmd_comment_or_modify(const CliConfig& cfg, const std::string& self_exe_path
     }
 
     if (arch.is_locked) {
-        err_println(cfg, "错误: 压缩文件已锁定");
+        err_println(cfg, msg("err.locked"));
         return RAR_EXIT_LOCKED;
     }
 
@@ -1938,50 +2288,101 @@ int cmd_comment_or_modify(const CliConfig& cfg, const std::string& self_exe_path
 
     if (cfg.command == "c" || !cfg.comment_file.empty()) {
         if (!cfg.comment_file.empty()) {
-            out_println(cfg, "正在从 " + cfg.comment_file + " 读取注释");
+            out_println(cfg, msgf("action.reading_comment", cfg.comment_file));
             std::ifstream cf(make_fspath(cfg.comment_file), std::ios::binary);
             if (cf) {
                 arch.comment.assign((std::istreambuf_iterator<char>(cf)), std::istreambuf_iterator<char>());
+                if (charset_applies(cfg, 'c')) arch.comment = decode_text(arch.comment, cfg.charset);
             }
         } else {
-            out_println(cfg, "请输入注释 (以 Ctrl+Z 或 EOF 结束):");
+            out_println(cfg, msg("action.comment_prompt"));
             std::ostringstream ss;
             ss << std::cin.rdbuf();
             arch.comment = ss.str();
         }
-        out_println(cfg, "正在添加注释到 " + to_native_slashes(arch_path) + "                                    完成");
+        out_println(cfg, msgf("action.adding_comment", to_native_slashes(arch_path), msg("status.ok")));
     }
 
     if (cfg.command == "k") {
-        out_println(cfg, "正在锁定压缩文件 " + to_native_slashes(arch_path));
+        out_println(cfg, msgf("action.locking_path", to_native_slashes(arch_path)));
         sopts.lock_archive = true;
     }
 
+    if (cfg.command == "ch" && cfg.case_convert != 0) {
+        for (auto& e : arch.entries) {
+            e.name = (cfg.case_convert == 1) ? to_lower_ascii(e.name) : to_upper_ascii(e.name);
+        }
+    }
+    if (cfg.command == "ch" && (cfg.method_explicit || cfg.solid_explicit)) {
+        out_println(cfg, msg("action.recompress"));
+        Rar5Decompressor decomp;
+        struct Blob {
+            RarFileEntry meta;
+            std::vector<uint8_t> data;
+        };
+        std::vector<Blob> blobs;
+        for (size_t i = 0; i < arch.entries.size(); ++i) {
+            Blob b;
+            b.meta = arch.entries[i];
+            if (!b.meta.is_dir && b.meta.redir_type == REDIR5_NONE) {
+                arch.extract_entry(i, cfg.arch_opts.password, decomp, b.data, nullptr);
+            }
+            blobs.push_back(std::move(b));
+        }
+        arch.entries.clear();
+        Rar5Compressor comp;
+        comp.reset((128ULL * 1024ULL) << cfg.arch_opts.dict_bits);
+        sopts.method = cfg.arch_opts.method;
+        sopts.solid = cfg.arch_opts.solid;
+        bool prior = false;
+        for (auto& b : blobs) {
+            RarEntryExtra ex;
+            ex.host_os_set = true;
+            ex.host_os = b.meta.host_os;
+            ex.redir_type = b.meta.redir_type;
+            ex.redir_target = b.meta.redir_target;
+            ex.has_owner = b.meta.has_owner;
+            ex.owner_user = b.meta.owner_user;
+            ex.owner_group = b.meta.owner_group;
+            ex.owner_uid = b.meta.owner_uid;
+            ex.owner_gid = b.meta.owner_gid;
+            bool cont = sopts.solid && prior && !b.meta.is_dir && b.meta.redir_type == REDIR5_NONE;
+            arch.add_entry_from_memory(b.meta.name, b.data.data(), b.data.size(), b.meta.is_dir,
+                                       b.meta.attributes, b.meta.mtime_winft, b.meta.ctime_winft,
+                                       b.meta.atime_winft, sopts, comp, cont, &ex);
+            if (!b.meta.is_dir && sopts.method > 0 && sopts.solid) prior = true;
+        }
+    }
+
     if (cfg.command == "rr" || cfg.command == "rv") {
-        out_println(cfg, "正在添加数据恢复记录到 " + to_native_slashes(arch_path));
+        out_println(cfg, msgf("action.adding_rr_to", to_native_slashes(arch_path)));
     }
 
     if (cfg.command == "s") {
         std::string stub_src = cfg.sfx_stub_name.empty() ? self_exe_path : cfg.sfx_stub_name;
         arch.sfx_stub = RarArchive::create_default_sfx_stub(stub_src);
         fs::path ap = make_fspath(arch_path);
+#ifdef _WIN32
         ap.replace_extension(".exe");
+#else
+        ap.replace_extension(".sfx");
+#endif
         arch_path = fspath_to_utf8(ap);
-        out_println(cfg, "正在创建自解压压缩文件 " + to_native_slashes(arch_path));
+        out_println(cfg, msgf("action.creating_sfx", to_native_slashes(arch_path)));
     } else if (cfg.command == "s-") {
         arch.sfx_stub.clear();
         fs::path ap = make_fspath(arch_path);
         ap.replace_extension(".rar");
         arch_path = fspath_to_utf8(ap);
-        out_println(cfg, "正在创建压缩文件 " + to_native_slashes(arch_path));
+        out_println(cfg, msgf("action.creating", to_native_slashes(arch_path)));
     }
 
-    RarExitCode src = arch.save(arch_path, sopts, nullptr, &err_msg);
+    RarExitCode src = store_archive(cfg, arch, arch_path, sopts, nullptr, &err_msg);
     if (src != RAR_EXIT_SUCCESS) {
-        err_println(cfg, "错误: " + err_msg);
+        err_println(cfg, msgf("err.generic", err_msg));
         return (int)src;
     }
-    if (!cfg.quiet_done) out_println(cfg, "完成");
+    if (!cfg.quiet_done) out_println(cfg, msg("status.done"));
     return RAR_EXIT_SUCCESS;
 }
 
@@ -1995,8 +2396,27 @@ bool is_self_sfx_archive(const std::string& exe_path) {
 } // anonymous namespace
 
 int CliRunner::run(int argc, const std::vector<std::string>& args) {
+    set_binary_stdio(true, true);
     CliConfig cfg;
-    std::string self_exe_path = (!args.empty()) ? args[0] : "";
+    std::vector<std::string> argv(args.begin(), args.end());
+    std::string resolved = executable_path();
+    if (!resolved.empty()) {
+        if (argv.empty()) argv.push_back(resolved);
+        else argv[0] = resolved;
+    }
+    std::string self_exe_path = (!argv.empty()) ? argv[0] : "";
+    bool skip_cfg = false;
+    bool saw_disk_erase = false;
+    for (size_t i = 1; i < argv.size(); ++i) {
+        std::string low = to_lower_ascii(argv[i]);
+        if (low == "-cfg-") skip_cfg = true;
+        if (low == "-vd") saw_disk_erase = true;
+    }
+    if (!skip_cfg) {
+        auto extra = load_config_tokens(self_exe_path);
+        argv.insert(argv.begin() + 1, extra.begin(), extra.end());
+    }
+    argc = (int)argv.size();
 
     // Check if binary name starts with "unrar" (unrar-free mode defaults)
     std::string exe_name = to_lower_ascii(fspath_to_utf8(make_fspath(self_exe_path).filename()));
@@ -2005,10 +2425,10 @@ int CliRunner::run(int argc, const std::vector<std::string>& args) {
     bool stop_switches = false;
     std::vector<std::string> positional;
 
-    for (size_t i = 1; i < (size_t)argc && i < args.size(); ++i) {
-        const std::string& tok = args[i];
+    for (size_t i = 1; i < (size_t)argc && i < argv.size(); ++i) {
+        const std::string& tok = argv[i];
         if (!stop_switches && !tok.empty() && tok[0] == '-') {
-            if (!parse_switch(tok, cfg, args, i)) {
+            if (!parse_switch(tok, cfg, argv, i)) {
                 stop_switches = true;
             }
             continue;
@@ -2048,9 +2468,33 @@ int CliRunner::run(int argc, const std::vector<std::string>& args) {
         return RAR_EXIT_SUCCESS;
     }
 
+    if (cfg.format_version < 5) {
+        err_println(cfg, msg("err.ma4"));
+        return RAR_EXIT_USER_ERROR;
+    }
+    if (saw_disk_erase) err_println(cfg, msg("warn.vd"));
+#ifndef _WIN32
+    if (cfg.archive_attr_only) err_println(cfg, msg("warn.ao"));
+#endif
+    if ((cfg.command == "a" || cfg.command == "m" || cfg.command == "mf") && cfg.update_switch) cfg.command = "u";
+    else if ((cfg.command == "a" || cfg.command == "m" || cfg.command == "mf") && cfg.freshen_switch) cfg.command = "f";
+    if (cfg.priority >= 0) set_process_priority(cfg.priority);
+    if (cfg.threads <= 0) {
+        unsigned hc = std::thread::hardware_concurrency();
+        cfg.threads = (int)std::min<unsigned>(hc == 0 ? 1 : hc, 32);
+    }
+    maybe_prompt_password(cfg);
+    auto finish = [&](int code) {
+        if (code == RAR_EXIT_SUCCESS) {
+            if (cfg.beep_when_done) beep();
+            if (cfg.power_off > 0) request_power_action(cfg.power_off);
+        }
+        return code;
+    };
+
     // Handle special `rar i[par]=<str> <archive>` case where archive is first positional
     if (positional.empty()) {
-        err_println(cfg, "错误: 未指定压缩文件名");
+        err_println(cfg, msg("err.no_archive"));
         return RAR_EXIT_USER_ERROR;
     }
 
@@ -2073,32 +2517,32 @@ int CliRunner::run(int argc, const std::vector<std::string>& args) {
 
     if (cfg.command == "l" || cfg.command == "lt" || cfg.command == "lta" || cfg.command == "lb" ||
         cfg.command == "v" || cfg.command == "vt" || cfg.command == "vta" || cfg.command == "vb") {
-        return cmd_list(cfg);
+        return finish(cmd_list(cfg));
     }
     if (cfg.command == "t") {
-        return cmd_test(cfg);
+        return finish(cmd_test(cfg));
     }
     if (cfg.command == "x" || cfg.command == "e" || cfg.command == "p") {
-        return cmd_extract_or_print(cfg);
+        return finish(cmd_extract_or_print(cfg));
     }
     if (cfg.command == "a" || cfg.command == "u" || cfg.command == "f" ||
         cfg.command == "m" || cfg.command == "mf") {
-        return cmd_add_or_update(cfg, self_exe_path);
+        return finish(cmd_add_or_update(cfg, self_exe_path));
     }
     if (cfg.command == "d") {
-        return cmd_delete(cfg);
+        return finish(cmd_delete(cfg));
     }
     if (cfg.command == "rn") {
-        return cmd_rename(cfg);
+        return finish(cmd_rename(cfg));
     }
     if (cfg.command == "c" || cfg.command == "cw" || cfg.command == "k" ||
         cfg.command == "rr" || cfg.command == "rv" || cfg.command == "s" ||
         cfg.command == "s-" || cfg.command == "r" || cfg.command == "rc" ||
         cfg.command == "ch" || cfg.command == "i") {
-        return cmd_comment_or_modify(cfg, self_exe_path);
+        return finish(cmd_comment_or_modify(cfg, self_exe_path));
     }
 
-    err_println(cfg, "未知命令: " + cfg.command);
+    err_println(cfg, msgf("err.unknown_cmd", cfg.command));
     return RAR_EXIT_USER_ERROR;
 }
 
