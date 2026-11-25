@@ -14,6 +14,7 @@
 #include "rar_crypto.h"
 #include "rar_codec.h"
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -63,6 +64,13 @@ struct RarFileEntry {
     uint64_t    redir_flags = 0;
     std::string redir_target;
 
+    // Unix owner (EX_UOWNER, 0x06). Names are UTF-8.
+    bool        has_owner = false;
+    std::string owner_user;
+    std::string owner_group;
+    uint32_t    owner_uid = 0;
+    uint32_t    owner_gid = 0;
+
     // Raw packed (and possibly encrypted) payload bytes
     std::vector<uint8_t> packed_data;
 };
@@ -80,6 +88,21 @@ struct RarArchiveOptions {
     bool        encrypt_headers = false;  // -hp[pwd]
     bool        save_ctime = false;       // -tsc
     bool        save_atime = false;       // -tsa
+    bool        omit_endarc = false;      // -en (final volume only)
+    bool        old_volume_names = false; // -vn
+};
+
+// Optional metadata supplied when a file is added from memory.
+struct RarEntryExtra {
+    bool        host_os_set = false;
+    uint64_t    host_os = HOST5_WINDOWS;
+    uint64_t    redir_type = REDIR5_NONE;
+    std::string redir_target;
+    bool        has_owner = false;
+    std::string owner_user;
+    std::string owner_group;
+    uint32_t    owner_uid = 0;
+    uint32_t    owner_gid = 0;
 };
 
 class RarArchive {
@@ -97,6 +120,9 @@ public:
     std::vector<RarFileEntry> entries;
     std::vector<uint8_t>      recovery_data;
 
+    // Return false to abort before a volume file is written (-vp).
+    std::function<bool(const std::string& volume_path)> before_volume;
+
     // Load a RAR 5.0 archive from disk (automatically resolves multi-volume sets)
     RarExitCode load(const std::string& path, const std::string& password = "", std::string* err_msg = nullptr);
 
@@ -112,7 +138,20 @@ public:
                                uint64_t mtime_winft, uint64_t ctime_winft, uint64_t atime_winft,
                                const RarArchiveOptions& opts,
                                Rar5Compressor& compressor,
-                               bool solid_continuation);
+                               bool solid_continuation,
+                               const RarEntryExtra* extra = nullptr);
+
+    // Compress one file without inserting it. Safe to call on separate archives/compressors in parallel.
+    RarFileEntry build_entry_from_memory(const std::string& internal_name,
+                                         const uint8_t* raw_data, size_t raw_len,
+                                         bool is_dir, uint64_t attributes,
+                                         uint64_t mtime_winft, uint64_t ctime_winft, uint64_t atime_winft,
+                                         const RarArchiveOptions& opts,
+                                         Rar5Compressor& compressor,
+                                         bool solid_continuation,
+                                         const RarEntryExtra* extra = nullptr) const;
+
+    bool commit_entry(RarFileEntry entry);
 
     // Extract & verify a single entry (`entries[index]`) using `decompressor`
     RarExitCode extract_entry(size_t index, const std::string& password,
@@ -127,9 +166,21 @@ public:
                                       std::vector<std::string>& found_names,
                                       bool& used_recovery_record);
 
-    // Create default Windows console SFX stub (or read custom SFX stub)
+    // Create an SFX stub from this executable (or a caller-supplied stub file).
     static std::vector<uint8_t> create_default_sfx_stub(const std::string& self_exe_path);
 };
+
+// Volume names. index is 1-based. old_style uses name.rar, name.r00, name.r01, ...
+std::string make_volume_name(const std::string& base_path, size_t index_1based, bool old_style);
+
+// If `any_path` is a later volume and the first volume exists, return the first volume.
+std::string locate_first_volume(const std::string& any_path);
+
+// Reed-Solomon recovery volumes (.rev) over the raw volume files.
+bool write_recovery_volumes(const std::vector<std::string>& data_volumes, int parity_count,
+                            bool old_style, std::vector<std::string>& created, std::string* err);
+bool reconstruct_missing_volumes(const std::string& any_path,
+                                 std::vector<std::string>& restored, std::string* err);
 
 // Time conversion helpers between Unix time_t / std::filesystem and Windows FILETIME
 uint64_t unix_to_win_filetime(int64_t unix_sec, uint32_t nsec = 0);

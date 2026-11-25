@@ -1,0 +1,121 @@
+# OpenRAR 简体中文界面。每行 key<TAB>value，换行写成 \n。
+banner.title	RAR 7.01 x64 (OpenRAR Clean-Room GPLv3+)
+help.body	用法:     rar <命令> -<开关 1> -<开关 N> <压缩文件> <文件...>\n               <@列表文件...> <解压路径/>\n\n<命令>\n  a             添加文件到压缩文件\n  c             添加压缩文件注释\n  ch            更改压缩文件参数\n  cw            将压缩文件注释写入文件\n  d             从压缩文件删除文件\n  e             解压文件但不包含路径\n  f             刷新压缩文件中的文件\n  i[par]=<str>  在压缩文件中查找字符串\n  k             锁定压缩文件\n  l[t[a],b]     列出压缩文件内容 [技术信息[全部], 简洁]\n  m[f]          移动到压缩文件 [仅限文件]\n  p             打印文件到标准输出\n  r             修复压缩文件\n  rc            重建丢失的卷\n  rn            重命名压缩文件中的文件\n  rr[N]         添加数据恢复记录\n  rv[N]         创建恢复卷\n  s[name|-]     转换为自解压或从自解压转回\n  t             测试压缩文件\n  u             更新压缩文件中的文件\n  v[t[a],b]     详细列出压缩文件内容\n  x             使用完整路径解压文件\n\n<开关>\n  -             停止扫描开关\n  -?            显示帮助\n  -@[+]         禁用 [启用] 文件列表\n  -ac           压缩或解压后清除存档属性\n  -ad[1,2]      附加压缩文件名到目标路径\n  -ag[format]   使用当前日期生成压缩文件名\n  -ai           忽略文件属性\n  -ao           只添加带存档属性的文件\n  -ap<path>     设置压缩文件内部路径\n  -as           同步压缩文件内容\n  -c-           禁用注释显示\n  -cfg-         不读取配置文件和 RAR 环境变量\n  -cl           把名称转为小写\n  -cu           把名称转为大写\n  -df           压缩后删除文件\n  -dh           打开共享文件\n  -dr           压缩后把文件移到回收站\n  -ds           禁用固实压缩文件的名称排序\n  -dw           压缩后擦除文件\n  -ed           不添加空目录\n  -en           不写入压缩文件结束块\n  -ep           从名称中排除路径\n  -ep1          从名称中排除基本目录\n  -ep2          展开为完整路径\n  -ep3          展开为包含驱动器号的完整路径\n  -ep4<path>    从名称中排除路径前缀\n  -f            刷新文件\n  -hp[password] 加密文件数据和标头\n  -ht[b|c]      选择哈希类型 [BLAKE2sp|CRC32]\n  -id[c,d,n,p,q] 禁用消息\n  -ieml[.][addr] 为完成的压缩文件打开邮件撰写\n  -ierr         把所有消息发到标准错误\n  -ilog[name]   把错误写入日志\n  -inul         禁用所有消息\n  -ioff[n]      完成后关闭计算机 (1 关机, 2 休眠, 3 睡眠, 4 重启)\n  -isnd         完成时发声\n  -iver         显示版本号\n  -k            锁定压缩文件\n  -kb           保留损坏的已解压文件\n  -log[=name]   把名称写入日志\n  -m<0..5>      压缩级别 (0 存储 ... 3 默认 ... 5 最大)\n  -ma[4|5]      压缩格式版本 (仅支持 5)\n  -mc<par>      高级压缩参数\n  -md<n>[k,m,g] 字典大小\n  -ms[ext;ext]  指定直接存储的文件类型\n  -mt<threads>  线程数\n  -n<file>      附加包含过滤\n  -n@           从标准输入读取包含掩码\n  -n@<list>     从列表文件读取包含掩码\n  -o[+|-]       设置覆盖模式\n  -oc           设置 NTFS 压缩属性\n  -oh           把硬链接保存为链接\n  -ol           把符号链接保存为链接\n  -oni          允许可能不兼容的文件名\n  -op<path>     设置解压输出路径\n  -or           自动重命名文件\n  -ow           保存或恢复所有者和组\n  -p[password]  设置密码 (空的 -p 在终端上询问)\n  -qo[-|+]      快速打开信息\n  -r            递归子目录\n  -r-           禁用递归\n  -r0           仅对通配符名称递归\n  -ri<p>[:<s>]  设置优先级 (0..15) 和休眠毫秒\n  -rr[N]        添加数据恢复记录\n  -rv[N]        创建恢复卷\n  -s[<N>,v[-],e] 创建固实压缩文件\n  -s-           禁用固实\n  -sc<chr>[obj] 字符集 (u, a, o) 与对象 (f, l, c)\n  -sfx[name]    创建自解压压缩文件\n  -si[name]     从标准输入读取数据\n  -sl<size>     处理小于指定大小的文件\n  -sm<size>     处理大于指定大小的文件\n  -t            压缩后测试文件\n  -ta<date>     处理修改时间晚于该日期的文件 (YYYYMMDDHHMMSS)\n  -tb<date>     处理修改时间早于该日期的文件 (YYYYMMDDHHMMSS)\n  -tk           保留原始压缩文件时间\n  -tl           把压缩文件时间设为最新文件\n  -tn<time>     处理比指定时间更新的文件\n  -to<time>     处理比指定时间更旧的文件\n  -ts[m,c,a]    保存或恢复文件时间 (修改, 创建, 访问)\n  -u            更新文件\n  -v<size>[k,b] 创建分卷\n  -vd           接受该开关，但不会擦除磁盘\n  -ver[n]       文件版本控制\n  -vn           使用旧式分卷命名\n  -vp           每个分卷前暂停\n  -w<path>      指定工作目录\n  -x<file>      排除指定文件\n  -x@           从标准输入读取排除列表\n  -x@<list>     排除列表文件中的文件\n  -y            对所有询问回答“是”\n  -z[file]      从文件读取压缩文件注释\n\n<unrar-free 长选项>\n  --extract           解压文件 (等同于 x)\n  --extract-no-paths  解压且不包含路径 (等同于 e)\n  --extract-newer     只解压较新的文件\n  --list              列出内容 (等同于 l)\n  --print             打印到标准输出 (等同于 p)\n  --force             覆盖已存在的文件\n  --password <pwd>    设置密码\n  --verbose           详细列表\n  --version           显示版本\n  --help              显示帮助\n
+status.ok	完成
+status.all_ok	全部正常
+status.done	完成
+host.windows	Windows
+host.unix	Unix
+err.generic	错误: {0}
+err.with_path	错误: {0} ({1})
+err.locked_modify	错误: 压缩文件已锁定，无法修改
+err.locked	错误: 压缩文件已锁定
+err.no_archive	错误: 未指定压缩文件名
+err.unknown_cmd	未知命令: {0}
+err.open_file	无法打开文件 {0}
+err.create_file	无法创建文件 {0}
+err.create_comment	无法创建注释文件 {0}
+err.save	保存错误: {0}
+err.cw_needs_file	错误: cw 命令需要指定输出注释文件名
+err.rn_pairs	错误: rn 命令需要成对的 <源文件名> <目标文件名> 参数
+err.extract	解压错误 {0}: {1}
+err.test	测试失败 {0}: {1}
+err.total	总共错误: {0}
+err.repair	修复失败: 未找到有效的 RAR 5.0 文件记录
+err.ma4	错误: 不支持 RAR 4.x (-ma4)，请使用 -ma5
+err.trash	无法把 {0} 移动到回收站
+err.poweroff	无法关闭计算机
+err.rev	无法重建丢失的卷
+err.rev_write	无法创建恢复卷
+err.no_files	没有要处理的文件
+list.archive	压缩文件: {0}
+list.details	详情: RAR 5
+list.solid	, 固实
+list.recovery	, 恢复记录
+list.locked	, 锁定
+list.enc_hdr	, 加密标头
+list.sfx	, 自解压
+list.volume	, 卷
+list.name	        名称: {0}
+list.type	        类型: {0}
+list.type_dir	目录
+list.type_file	文件
+list.size	        大小: {0}
+list.packed	  打包后大小: {0}
+list.ratio	      压缩率: {0}%
+list.mtime	    修改时间: {0}
+list.ctime	    创建时间: {0}
+list.atime	    访问时间: {0}
+list.attr	        属性: {0}
+list.crc	       CRC32: {0}
+list.blake	    BLAKE2sp: {0}
+list.host	     主机 OS: {0}
+list.comp	        压缩: RAR 5.0(v50) -m{0} -md={1}
+list.solid_word	 固实
+list.password	        密码: 是 (AES-256)
+list.owner	        所有者: {0}
+list.hdr_verbose	 属性            大小    已压缩  比率   日期       时间     校验和   名称
+list.rule_verbose	----------- ---------  -------- ----- ---------- -----  --------  ----
+list.hdr_brief	 属性            大小    日期       时间   名称
+list.rule_brief	----------- ---------  ---------- -----  ----
+action.testing	正在测试压缩文件 {0}
+action.testing_file	正在测试    {0}  {1}
+action.extracting_from	正在从 {0} 解压
+action.creating_dir	正在创建    {0}  {1}
+action.extracting	正在解压    {0}  {1}
+action.no_files_extract	没有文件可解压
+action.reading_comment	正在从 {0} 读取注释
+action.updating	正在更新压缩文件 {0}
+action.creating_sfx	正在创建自解压压缩文件 {0}
+action.creating	正在创建压缩文件 {0}
+action.adding	正在添加    {0}  {1}
+action.updating_file	正在更新    {0}  {1}
+action.deleting	正在删除 {0}
+action.adding_rr	正在添加数据恢复记录
+action.locking	正在锁定压缩文件
+action.locking_path	正在锁定压缩文件 {0}
+action.no_files_delete	没有文件可删除
+action.delete_empty	删除空的压缩文件 {0}
+action.renaming	正在将 {0} 重命名为 {1}
+action.no_match	没有文件匹配
+action.repairing	正在修复压缩文件 {0}
+action.rebuilding	正在重建 {0}
+action.found_rr	发现数据恢复记录
+action.found	发现 {0}
+action.repair_done	已完成
+action.processing	正在处理 {0}
+action.found_in	在 {0} 中找到匹配:
+action.comment_prompt	请输入注释 (以 Ctrl+Z 或 EOF 结束):
+action.adding_comment	正在添加注释到 {0}  {1}
+action.adding_rr_to	正在添加数据恢复记录到 {0}
+action.writing_comment	正在将注释写入 {0}  {1}
+action.overwrite	{0} 已存在。是否覆盖? [Y]是/[N]否/[A]全部/[Q]退出 
+action.password	请输入密码: 
+action.pause_volume	按 Enter 继续处理分卷 {0}
+action.email	正在为 {0} 打开邮件撰写
+action.email_missing	找不到邮件程序 ({0})，压缩文件已留在磁盘上
+action.rev_write	正在创建恢复卷 {0}
+action.rev_restore	正在恢复分卷 {0}
+action.recompress	正在重新压缩
+action.linking	正在链接    {0}  {1}
+warn.vd	-vd 不会擦除磁盘
+warn.ao	-ao 使用 Windows 存档属性；在此系统上会包含全部文件
+arc.cannot_open	无法打开 {0}
+arc.rar4	不支持旧版 RAR 4.x 格式，仅支持 RAR 5.0 格式
+arc.not_rar	{0} 不是 RAR 压缩文件
+arc.bad_enc_hdr	加密文件头损坏或密码错误
+arc.trunc_enc	加密文件头截断
+arc.bad_hdr_size	文件头大小解析失败
+arc.unexpected_end	压缩文件意外结束
+arc.bad_hdr_crc	文件头校验和 (CRC32) 错误
+arc.need_password	加密的压缩文件头需要密码 (-p 或 -hp)
+arc.bad_password	密码错误
+arc.data_oob	文件数据区域超出压缩包大小
+arc.missing_vol	找不到下一分卷: {0}
+arc.need_file_password	加密文件需要密码: {0}
+arc.bad_file_password	密码错误: {0}
+arc.bad_stream	解压数据流损坏: {0}
+arc.crc	校验和错误 (CRC32 不匹配): {0}
+arc.blake	校验和错误 (BLAKE2sp 不匹配): {0}
+arc.write	无法写入压缩文件 {0}
+arc.write_vol	无法写入分卷 {0}

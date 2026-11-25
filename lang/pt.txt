@@ -1,0 +1,121 @@
+# OpenRAR interface em português. chave<TAB>valor, quebra de linha como \n.
+banner.title	RAR 7.01 x64 (OpenRAR Clean-Room GPLv3+)
+help.body	Uso:      rar <comando> -<opção 1> -<opção N> <arquivo> <ficheiros...>\n               <@listas...> <caminho_de_extração/>\n\n<Comandos>\n  a             Adicionar ficheiros ao arquivo\n  c             Adicionar comentário do arquivo\n  ch            Alterar parâmetros do arquivo\n  cw            Gravar o comentário do arquivo num ficheiro\n  d             Apagar ficheiros do arquivo\n  e             Extrair ficheiros sem os caminhos\n  f             Atualizar só ficheiros que já estão no arquivo\n  i[par]=<str>  Procurar uma cadeia nos arquivos\n  k             Bloquear o arquivo\n  l[t[a],b]     Listar o conteúdo [técnico[tudo], breve]\n  m[f]          Mover para o arquivo [só ficheiros]\n  p             Imprimir o ficheiro na saída padrão\n  r             Reparar o arquivo\n  rc            Reconstruir volumes em falta\n  rn            Renomear ficheiros arquivados\n  rr[N]         Adicionar registo de recuperação\n  rv[N]         Criar volumes de recuperação\n  s[name|-]     Converter o arquivo para ou de SFX\n  t             Testar os ficheiros do arquivo\n  u             Atualizar ficheiros do arquivo\n  v[t[a],b]     Listar o conteúdo em detalhe\n  x             Extrair ficheiros com o caminho completo\n\n<Opções>\n  -             Parar de ler opções\n  -?            Mostrar a ajuda\n  -@[+]         Desativar [ativar] listas de ficheiros\n  -ac           Limpar o atributo Arquivo após comprimir ou extrair\n  -ad[1,2]      Acrescentar o nome do arquivo ao caminho de destino\n  -ag[format]   Gerar o nome do arquivo com a data atual\n  -ai           Ignorar atributos de ficheiro\n  -ao           Adicionar ficheiros com o atributo Arquivo\n  -ap<caminho>  Caminho dentro do arquivo\n  -as           Sincronizar o conteúdo do arquivo\n  -c-           Não mostrar comentários\n  -cfg-         Ignorar o ficheiro de configuração e a variável RAR\n  -cl           Converter nomes para minúsculas\n  -cu           Converter nomes para maiúsculas\n  -df           Apagar ficheiros após arquivar\n  -dh           Abrir ficheiros partilhados\n  -dr           Enviar ficheiros para a lixeira após arquivar\n  -ds           Não ordenar nomes em arquivos sólidos\n  -dw           Apagar ficheiros de forma segura após arquivar\n  -ed           Não adicionar diretórios vazios\n  -en           Não escrever o bloco de fim de arquivo\n  -ep           Excluir caminhos dos nomes\n  -ep1          Excluir o diretório base dos nomes\n  -ep2          Expandir os caminhos por completo\n  -ep3          Expandir os caminhos, incluindo a letra da unidade\n  -ep4<caminho> Excluir o prefixo de caminho dos nomes\n  -f            Atualizar ficheiros já existentes\n  -hp[password] Cifrar dados e cabeçalhos\n  -ht[b|c]      Escolher o hash [BLAKE2sp|CRC32]\n  -id[c,d,n,p,q] Desativar mensagens\n  -ieml[.][addr] Abrir um editor de e-mail para o arquivo pronto\n  -ierr         Enviar todas as mensagens para a saída de erro\n  -ilog[name]   Registar erros num ficheiro\n  -inul         Desativar todas as mensagens\n  -ioff[n]      Desligar o PC no fim (1 desligar, 2 hibernar, 3 suspender, 4 reiniciar)\n  -isnd         Ativar o som\n  -iver         Mostrar o número da versão\n  -k            Bloquear o arquivo\n  -kb           Manter ficheiros extraídos danificados\n  -log[=name]   Escrever nomes num registo\n  -m<0..5>      Nível de compressão (0-guardar...3-predefinição...5-máximo)\n  -ma[4|5]      Versão do formato (apenas 5)\n  -mc<par>      Parâmetros avançados de compressão\n  -md<n>[k,m,g] Tamanho do dicionário\n  -ms[ext;ext]  Tipos de ficheiro a guardar sem comprimir\n  -mt<threads>  Número de fios de execução\n  -n<file>      Filtro adicional de inclusão\n  -n@           Ler mais máscaras da entrada padrão\n  -n@<list>     Ler mais máscaras de um ficheiro de lista\n  -o[+|-]       Modo de substituição\n  -oc           Definir o atributo comprimido NTFS\n  -oh           Guardar ligações físicas como ligação\n  -ol           Tratar ligações simbólicas como ligação\n  -oni          Permitir nomes que podem ser incompatíveis\n  -op<caminho>  Caminho de saída dos ficheiros extraídos\n  -or           Renomear ficheiros automaticamente\n  -ow           Guardar ou restaurar proprietário e grupo\n  -p[password]  Senha (-p vazio pergunta num terminal)\n  -qo[-|+]      Informação de abertura rápida\n  -r            Percorrer subdiretórios\n  -r-           Desativar a recursão\n  -r0           Subdiretórios só para nomes com curingas\n  -ri<p>[:<s>]  Prioridade (0..15) e pausa em milissegundos\n  -rr[N]        Adicionar registo de recuperação\n  -rv[N]        Criar volumes de recuperação\n  -s[<N>,v[-],e] Criar um arquivo sólido\n  -s-           Desativar o arquivo sólido\n  -sc<chr>[obj] Conjunto de carateres (u, a, o) e objetos (f, l, c)\n  -sfx[name]    Criar um arquivo SFX\n  -si[name]     Ler dados da entrada padrão\n  -sl<size>     Ficheiros menores que o tamanho indicado\n  -sm<size>     Ficheiros maiores que o tamanho indicado\n  -t            Testar ficheiros após arquivar\n  -ta<date>     Ficheiros modificados depois de <data> AAAAMMDDHHMMSS\n  -tb<date>     Ficheiros modificados antes de <data> AAAAMMDDHHMMSS\n  -tk           Manter a hora original do arquivo\n  -tl           Pôr a hora do arquivo na do ficheiro mais recente\n  -tn<time>     Ficheiros mais recentes que <tempo>\n  -to<time>     Ficheiros mais antigos que <tempo>\n  -ts[m,c,a]    Guardar ou restaurar a hora (modificação, criação, acesso)\n  -u            Atualizar ficheiros\n  -v<size>[k,b] Criar volumes de tamanho=<tamanho>*1000 [*1024, *1]\n  -vd           Aceite e ignorado; os discos não são apagados\n  -ver[n]       Versões de ficheiros\n  -vn           Nomes de volume ao estilo antigo\n  -vp           Pausa antes de cada volume\n  -w<caminho>   Diretório de trabalho\n  -x<file>      Excluir o ficheiro indicado\n  -x@           Ler nomes a excluir da entrada padrão\n  -x@<list>     Excluir os ficheiros da lista indicada\n  -y            Responder Sim a todas as perguntas\n  -z[file]      Ler o comentário do arquivo de um ficheiro\n\n<opções longas do unrar-free>\n  --extract           Extrair ficheiros (igual a x)\n  --extract-no-paths  Extrair sem caminhos (igual a e)\n  --extract-newer     Extrair só ficheiros mais recentes\n  --list              Listar o arquivo (igual a l)\n  --print             Imprimir na saída padrão (igual a p)\n  --force             Substituir ficheiros existentes\n  --password <pwd>    Definir a senha\n  --verbose           Lista detalhada\n  --version           Mostrar a versão\n  --help              Mostrar a ajuda
+status.ok	OK
+status.all_ok	Tudo OK
+status.done	Concluído
+host.windows	Windows
+host.unix	Unix
+err.generic	ERRO: {0}
+err.with_path	ERRO: {0} ({1})
+err.locked_modify	ERRO: o arquivo está bloqueado e não pode ser modificado
+err.locked	ERRO: o arquivo está bloqueado
+err.no_archive	ERRO: o nome do arquivo não foi indicado
+err.unknown_cmd	Comando desconhecido: {0}
+err.open_file	Não é possível abrir o arquivo {0}
+err.create_file	Não é possível criar o arquivo {0}
+err.create_comment	Não é possível criar o arquivo de comentário {0}
+err.save	Erro ao gravar: {0}
+err.cw_needs_file	ERRO: cw exige um nome de arquivo de comentário
+err.rn_pairs	ERRO: rn exige pares <origem> <destino>
+err.extract	Erro ao extrair {0}: {1}
+err.test	Teste falhou {0}: {1}
+err.total	Total de erros: {0}
+err.repair	Reparo falhou: nenhum registro RAR 5.0 válido
+err.ma4	ERRO: RAR 4.x (-ma4) não é suportado; use -ma5
+err.trash	Não é possível mover {0} para a lixeira
+err.poweroff	Não é possível desligar o computador
+err.rev	Não é possível reconstruir os volumes ausentes
+err.rev_write	Não é possível criar os volumes de recuperação
+err.no_files	Nenhum arquivo para processar
+list.archive	Arquivo: {0}
+list.details	Detalhes: RAR 5
+list.solid	, sólido
+list.recovery	, registro de recuperação
+list.locked	, bloqueado
+list.enc_hdr	, cabeçalhos cifrados
+list.sfx	, SFX
+list.volume	, volume
+list.name	        Nome: {0}
+list.type	        Tipo: {0}
+list.type_dir	Diretório
+list.type_file	Arquivo
+list.size	     Tamanho: {0}
+list.packed	  Compactado: {0}
+list.ratio	      Razão: {0}%
+list.mtime	 Modificado: {0}
+list.ctime	     Criado: {0}
+list.atime	    Acesso: {0}
+list.attr	   Atributos: {0}
+list.crc	       CRC32: {0}
+list.blake	    BLAKE2sp: {0}
+list.host	   SO de origem: {0}
+list.comp	  Compressão: RAR 5.0(v50) -m{0} -md={1}
+list.solid_word	 sólido
+list.password	      Senha: sim (AES-256)
+list.owner	 Proprietário: {0}
+list.hdr_verbose	 Atributos      Tamanho Compact. Razão   Data       Hora   Soma      Nome
+list.rule_verbose	----------- ---------  -------- ----- ---------- -----  --------  ----
+list.hdr_brief	 Atributos      Tamanho Data       Hora   Nome
+list.rule_brief	----------- ---------  ---------- -----  ----
+action.testing	Testando o arquivo {0}
+action.testing_file	Testando    {0}  {1}
+action.extracting_from	Extraindo de {0}
+action.creating_dir	Criando     {0}  {1}
+action.extracting	Extraindo   {0}  {1}
+action.no_files_extract	Nenhum arquivo para extrair
+action.reading_comment	Lendo o comentário de {0}
+action.updating	Atualizando o arquivo {0}
+action.creating_sfx	Criando arquivo SFX {0}
+action.creating	Criando o arquivo {0}
+action.adding	Adicionando {0}  {1}
+action.updating_file	Atualizando {0}  {1}
+action.deleting	Excluindo {0}
+action.adding_rr	Adicionando o registro de recuperação
+action.locking	Bloqueando o arquivo
+action.locking_path	Bloqueando o arquivo {0}
+action.no_files_delete	Nenhum arquivo para excluir
+action.delete_empty	Excluindo o arquivo vazio {0}
+action.renaming	Renomeando {0} para {1}
+action.no_match	Nenhum arquivo corresponde
+action.repairing	Reparando o arquivo {0}
+action.rebuilding	Reconstruindo {0}
+action.found_rr	Registro de recuperação encontrado
+action.found	Encontrado {0}
+action.repair_done	Concluído
+action.processing	Processando {0}
+action.found_in	Correspondência em {0}:
+action.comment_prompt	Digite o comentário (termine com Ctrl+Z ou EOF):
+action.adding_comment	Adicionando comentário a {0}  {1}
+action.adding_rr_to	Adicionando o registro de recuperação a {0}
+action.writing_comment	Gravando o comentário em {0}  {1}
+action.overwrite	{0} já existe. Substituir? [Y]es/[N]ão/[A]ll/[Q]uit 
+action.password	Senha: 
+action.pause_volume	Pressione Enter para continuar com o volume {0}
+action.email	Abrindo um editor de e-mail para {0}
+action.email_missing	Nenhum editor de e-mail para {0}; o arquivo ficou no disco
+action.rev_write	Criando o volume de recuperação {0}
+action.rev_restore	Restaurando o volume {0}
+action.recompress	Recompactando o arquivo
+action.linking	Ligando     {0}  {1}
+warn.vd	-vd não apaga discos
+warn.ao	-ao segue o atributo Arquivo do Windows; neste sistema todos os arquivos são incluídos
+arc.cannot_open	Não é possível abrir {0}
+arc.rar4	RAR 4.x não é suportado; apenas RAR 5.0 é suportado
+arc.not_rar	{0} não é um arquivo RAR
+arc.bad_enc_hdr	O cabeçalho cifrado está danificado ou a senha está errada
+arc.trunc_enc	O cabeçalho cifrado está truncado
+arc.bad_hdr_size	Falha ao ler o tamanho do cabeçalho
+arc.unexpected_end	Fim inesperado do arquivo
+arc.bad_hdr_crc	A soma do cabeçalho (CRC32) não confere
+arc.need_password	Cabeçalhos cifrados exigem uma senha (-p ou -hp)
+arc.bad_password	Senha incorreta
+arc.data_oob	Os dados do arquivo passam do fim
+arc.missing_vol	Próximo volume não encontrado: {0}
+arc.need_file_password	Senha necessária: {0}
+arc.bad_file_password	Senha incorreta: {0}
+arc.bad_stream	Os dados compactados estão danificados: {0}
+arc.crc	Erro de soma (CRC32): {0}
+arc.blake	Erro de soma (BLAKE2sp): {0}
+arc.write	Não é possível gravar o arquivo {0}
+arc.write_vol	Não é possível gravar o volume {0}

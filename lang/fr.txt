@@ -1,0 +1,121 @@
+# OpenRAR interface française. clé<TAB>valeur, saut de ligne en \n.
+banner.title	RAR 7.01 x64 (OpenRAR Clean-Room GPLv3+)
+help.body	Usage :    rar <commande> -<option 1> -<option N> <archive> <fichiers...>\n               <@listes...> <chemin_d_extraction/>\n\n<Commandes>\n  a             Ajouter des fichiers à l'archive\n  c             Ajouter un commentaire d'archive\n  ch            Modifier les paramètres de l'archive\n  cw            Écrire le commentaire d'archive dans un fichier\n  d             Supprimer des fichiers de l'archive\n  e             Extraire les fichiers sans les chemins archivés\n  f             Rafraîchir les fichiers de l'archive\n  i[par]=<str>  Chercher une chaîne dans les archives\n  k             Verrouiller l'archive\n  l[t[a],b]     Lister le contenu [technique[tout], nu]\n  m[f]          Déplacer vers l'archive [fichiers seulement]\n  p             Imprimer le fichier sur la sortie standard\n  r             Réparer l'archive\n  rc            Reconstruire les volumes manquants\n  rn            Renommer les fichiers archivés\n  rr[N]         Ajouter un enregistrement de récupération\n  rv[N]         Créer des volumes de récupération\n  s[name|-]     Convertir l'archive vers ou depuis un SFX\n  t             Tester les fichiers de l'archive\n  u             Mettre à jour les fichiers de l'archive\n  v[t[a],b]     Lister le contenu en détail\n  x             Extraire les fichiers avec le chemin complet\n\n<Options>\n  -             Arrêter l'analyse des options\n  -?            Afficher l'aide\n  -@[+]         Désactiver [activer] les listes de fichiers\n  -ac           Effacer l'attribut Archive après compression ou extraction\n  -ad[1,2]      Ajouter le nom de l'archive au chemin de destination\n  -ag[format]   Générer le nom d'archive avec la date actuelle\n  -ai           Ignorer les attributs de fichier\n  -ao           Ajouter les fichiers dont l'attribut Archive est défini\n  -ap<chemin>   Définir le chemin à l'intérieur de l'archive\n  -as           Synchroniser le contenu de l'archive\n  -c-           Ne pas afficher les commentaires\n  -cfg-         Ignorer le fichier de configuration et la variable RAR\n  -cl           Convertir les noms en minuscules\n  -cu           Convertir les noms en majuscules\n  -df           Supprimer les fichiers après archivage\n  -dh           Ouvrir les fichiers partagés\n  -dr           Envoyer les fichiers à la corbeille après archivage\n  -ds           Désactiver le tri des noms pour les archives solides\n  -dw           Effacer les fichiers après archivage\n  -ed           Ne pas ajouter les répertoires vides\n  -en           Ne pas ajouter le bloc de fin d'archive\n  -ep           Exclure les chemins des noms\n  -ep1          Exclure le répertoire de base des noms\n  -ep2          Développer les chemins en chemins complets\n  -ep3          Développer les chemins, lettre de lecteur comprise\n  -ep4<chemin>  Exclure le préfixe de chemin des noms\n  -f            Rafraîchir les fichiers\n  -hp[password] Chiffrer les données et les en-têtes\n  -ht[b|c]      Choisir le hachage [BLAKE2sp|CRC32]\n  -id[c,d,n,p,q] Désactiver des messages\n  -ieml[.][addr] Ouvrir un composeur de courriel pour l'archive terminée\n  -ierr         Envoyer tous les messages sur la sortie d'erreur\n  -ilog[name]   Journaliser les erreurs dans un fichier\n  -inul         Désactiver tous les messages\n  -ioff[n]      Éteindre le PC ensuite (1 arrêt, 2 hibernation, 3 veille, 4 redémarrage)\n  -isnd         Activer le son\n  -iver         Afficher le numéro de version\n  -k            Verrouiller l'archive\n  -kb           Conserver les fichiers extraits endommagés\n  -log[=name]   Écrire les noms dans un journal\n  -m<0..5>      Niveau de compression (0-stocker...3-défaut...5-maximal)\n  -ma[4|5]      Version du format d'archive (5 seulement)\n  -mc<par>      Paramètres de compression avancés\n  -md<n>[k,m,g] Taille du dictionnaire\n  -ms[ext;ext]  Types de fichiers à stocker\n  -mt<threads>  Nombre de threads\n  -n<file>      Filtrer en plus les fichiers inclus\n  -n@           Lire d'autres masques depuis l'entrée standard\n  -n@<list>     Lire d'autres masques depuis un fichier liste\n  -o[+|-]       Mode d'écrasement\n  -oc           Définir l'attribut compressé NTFS\n  -oh           Enregistrer les liens physiques comme liens\n  -ol           Traiter les liens symboliques comme liens\n  -oni          Autoriser des noms peut-être incompatibles\n  -op<chemin>   Chemin de sortie des fichiers extraits\n  -or           Renommer les fichiers automatiquement\n  -ow           Enregistrer ou restaurer propriétaire et groupe\n  -p[password]  Définir le mot de passe (-p vide demande sur un terminal)\n  -qo[-|+]      Informations d'ouverture rapide\n  -r            Parcourir les sous-répertoires\n  -r-           Désactiver la récursion\n  -r0           Sous-répertoires seulement pour les noms avec jokers\n  -ri<p>[:<s>]  Priorité (0..15) et pause en millisecondes\n  -rr[N]        Ajouter un enregistrement de récupération\n  -rv[N]        Créer des volumes de récupération\n  -s[<N>,v[-],e] Créer une archive solide\n  -s-           Désactiver l'archivage solide\n  -sc<chr>[obj] Jeu de caractères (u, a, o) et objets (f, l, c)\n  -sfx[name]    Créer une archive SFX\n  -si[name]     Lire les données depuis l'entrée standard\n  -sl<size>     Fichiers plus petits que la taille indiquée\n  -sm<size>     Fichiers plus grands que la taille indiquée\n  -t            Tester les fichiers après archivage\n  -ta<date>     Fichiers modifiés après <date> au format AAAAMMJJHHMMSS\n  -tb<date>     Fichiers modifiés avant <date> au format AAAAMMJJHHMMSS\n  -tk           Conserver l'heure d'origine de l'archive\n  -tl           Mettre l'heure de l'archive à celle du fichier le plus récent\n  -tn<time>     Fichiers plus récents que <durée>\n  -to<time>     Fichiers plus anciens que <durée>\n  -ts[m,c,a]    Enregistrer ou restaurer l'heure (modification, création, accès)\n  -u            Mettre à jour les fichiers\n  -v<size>[k,b] Créer des volumes de taille=<taille>*1000 [*1024, *1]\n  -vd           Accepté et ignoré ; les disques ne sont pas effacés\n  -ver[n]       Versions de fichiers\n  -vn           Ancien schéma de noms de volumes\n  -vp           Pause avant chaque volume\n  -w<chemin>    Répertoire de travail\n  -x<file>      Exclure le fichier indiqué\n  -x@           Lire les noms à exclure depuis l'entrée standard\n  -x@<list>     Exclure les fichiers de la liste indiquée\n  -y            Répondre Oui à toutes les questions\n  -z[file]      Lire le commentaire d'archive depuis un fichier\n\n<options longues unrar-free>\n  --extract           Extraire les fichiers (comme x)\n  --extract-no-paths  Extraire sans les chemins (comme e)\n  --extract-newer     Extraire seulement les fichiers plus récents\n  --list              Lister l'archive (comme l)\n  --print             Imprimer sur la sortie standard (comme p)\n  --force             Écraser les fichiers existants\n  --password <pwd>    Définir le mot de passe\n  --verbose           Liste détaillée\n  --version           Afficher la version\n  --help              Afficher l'aide
+status.ok	OK
+status.all_ok	Tout est OK
+status.done	Terminé
+host.windows	Windows
+host.unix	Unix
+err.generic	ERREUR : {0}
+err.with_path	ERREUR : {0} ({1})
+err.locked_modify	ERREUR : l'archive est verrouillée et ne peut pas être modifiée
+err.locked	ERREUR : l'archive est verrouillée
+err.no_archive	ERREUR : le nom de l'archive n'est pas indiqué
+err.unknown_cmd	Commande inconnue : {0}
+err.open_file	Impossible d'ouvrir le fichier {0}
+err.create_file	Impossible de créer le fichier {0}
+err.create_comment	Impossible de créer le fichier de commentaire {0}
+err.save	Erreur d'enregistrement : {0}
+err.cw_needs_file	ERREUR : cw exige un nom de fichier de commentaire
+err.rn_pairs	ERREUR : rn exige des paires <source> <destination>
+err.extract	Erreur d'extraction {0} : {1}
+err.test	Test échoué {0} : {1}
+err.total	Nombre total d'erreurs : {0}
+err.repair	Réparation échouée : aucun enregistrement RAR 5.0 valide
+err.ma4	ERREUR : RAR 4.x (-ma4) n'est pas pris en charge ; utilisez -ma5
+err.trash	Impossible de déplacer {0} vers la corbeille
+err.poweroff	Impossible d'éteindre l'ordinateur
+err.rev	Impossible de reconstruire les volumes manquants
+err.rev_write	Impossible de créer les volumes de récupération
+err.no_files	Aucun fichier à traiter
+list.archive	Archive : {0}
+list.details	Détails : RAR 5
+list.solid	, solide
+list.recovery	, enregistrement de récupération
+list.locked	, verrouillée
+list.enc_hdr	, en-têtes chiffrés
+list.sfx	, SFX
+list.volume	, volume
+list.name	        Nom : {0}
+list.type	        Type : {0}
+list.type_dir	Répertoire
+list.type_file	Fichier
+list.size	      Taille : {0}
+list.packed	 Taille comprimée : {0}
+list.ratio	      Ratio : {0}%
+list.mtime	    Modifié : {0}
+list.ctime	      Créé : {0}
+list.atime	      Accès : {0}
+list.attr	   Attributs : {0}
+list.crc	       CRC32 : {0}
+list.blake	    BLAKE2sp : {0}
+list.host	 Système hôte : {0}
+list.comp	  Compression : RAR 5.0(v50) -m{0} -md={1}
+list.solid_word	 solide
+list.password	 Mot de passe : oui (AES-256)
+list.owner	 Propriétaire : {0}
+list.hdr_verbose	 Attributs      Taille  Comprimé Ratio   Date       Heure  Somme     Nom
+list.rule_verbose	----------- ---------  -------- ----- ---------- -----  --------  ----
+list.hdr_brief	 Attributs      Taille  Date       Heure  Nom
+list.rule_brief	----------- ---------  ---------- -----  ----
+action.testing	Test de l'archive {0}
+action.testing_file	Test        {0}  {1}
+action.extracting_from	Extraction depuis {0}
+action.creating_dir	Création    {0}  {1}
+action.extracting	Extraction  {0}  {1}
+action.no_files_extract	Aucun fichier à extraire
+action.reading_comment	Lecture du commentaire depuis {0}
+action.updating	Mise à jour de l'archive {0}
+action.creating_sfx	Création de l'archive SFX {0}
+action.creating	Création de l'archive {0}
+action.adding	Ajout       {0}  {1}
+action.updating_file	Mise à jour {0}  {1}
+action.deleting	Suppression de {0}
+action.adding_rr	Ajout de l'enregistrement de récupération
+action.locking	Verrouillage de l'archive
+action.locking_path	Verrouillage de l'archive {0}
+action.no_files_delete	Aucun fichier à supprimer
+action.delete_empty	Suppression de l'archive vide {0}
+action.renaming	Renommage de {0} en {1}
+action.no_match	Aucun fichier ne correspond
+action.repairing	Réparation de l'archive {0}
+action.rebuilding	Reconstruction de {0}
+action.found_rr	Enregistrement de récupération trouvé
+action.found	Trouvé {0}
+action.repair_done	Terminé
+action.processing	Traitement de {0}
+action.found_in	Correspondance dans {0} :
+action.comment_prompt	Saisissez le commentaire (fin avec Ctrl+Z ou EOF) :
+action.adding_comment	Ajout du commentaire à {0}  {1}
+action.adding_rr_to	Ajout de l'enregistrement de récupération à {0}
+action.writing_comment	Écriture du commentaire dans {0}  {1}
+action.overwrite	{0} existe déjà. Écraser ? [Y]es/[N]on/[A]ll/[Q]uitter 
+action.password	Mot de passe : 
+action.pause_volume	Appuyez sur Entrée pour continuer avec le volume {0}
+action.email	Ouverture d'un composeur de courriel pour {0}
+action.email_missing	Aucun composeur de courriel pour {0} ; l'archive reste sur le disque
+action.rev_write	Création du volume de récupération {0}
+action.rev_restore	Restauration du volume {0}
+action.recompress	Recompression de l'archive
+action.linking	Lien        {0}  {1}
+warn.vd	-vd n'efface pas les disques
+warn.ao	-ao suit l'attribut Archive de Windows ; sur ce système chaque fichier est inclus
+arc.cannot_open	Impossible d'ouvrir {0}
+arc.rar4	RAR 4.x n'est pas pris en charge ; seul RAR 5.0 l'est
+arc.not_rar	{0} n'est pas une archive RAR
+arc.bad_enc_hdr	L'en-tête chiffré est corrompu ou le mot de passe est incorrect
+arc.trunc_enc	L'en-tête chiffré est tronqué
+arc.bad_hdr_size	Impossible d'analyser la taille de l'en-tête
+arc.unexpected_end	Fin d'archive inattendue
+arc.bad_hdr_crc	Somme de contrôle de l'en-tête (CRC32) incorrecte
+arc.need_password	Les en-têtes chiffrés exigent un mot de passe (-p ou -hp)
+arc.bad_password	Mot de passe incorrect
+arc.data_oob	Les données du fichier dépassent la fin de l'archive
+arc.missing_vol	Volume suivant introuvable : {0}
+arc.need_file_password	Mot de passe requis : {0}
+arc.bad_file_password	Mot de passe incorrect : {0}
+arc.bad_stream	Les données compressées sont corrompues : {0}
+arc.crc	Erreur de somme (CRC32) : {0}
+arc.blake	Erreur de somme (BLAKE2sp) : {0}
+arc.write	Impossible d'écrire l'archive {0}
+arc.write_vol	Impossible d'écrire le volume {0}

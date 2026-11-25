@@ -1,0 +1,121 @@
+# OpenRAR 日本語表示。key<TAB>値。改行は \n。
+banner.title	RAR 7.01 x64 (OpenRAR Clean-Room GPLv3+)
+help.body	使い方:   rar <コマンド> -<スイッチ 1> -<スイッチ N> <書庫> <ファイル...>\n               <@リスト...> <展開先/>\n\n<コマンド>\n  a             ファイルを書庫に追加\n  c             書庫コメントを追加\n  ch            書庫のパラメータを変更\n  cw            書庫コメントをファイルに書き出す\n  d             書庫からファイルを削除\n  e             パスなしでファイルを展開\n  f             書庫内のファイルを更新 (既存のみ)\n  i[par]=<str>  書庫内の文字列を検索\n  k             書庫をロック\n  l[t[a],b]     内容を一覧 [技術情報[すべて], 名前のみ]\n  m[f]          書庫へ移動 [ファイルのみ]\n  p             ファイルを標準出力へ出力\n  r             書庫を修復\n  rc            欠けたボリュームを再構築\n  rn            書庫内のファイル名を変更\n  rr[N]         リカバリレコードを追加\n  rv[N]         リカバリボリュームを作成\n  s[name|-]     SFX との相互変換\n  t             書庫内のファイルをテスト\n  u             書庫内のファイルを更新\n  v[t[a],b]     内容を詳しく一覧\n  x             フルパスでファイルを展開\n\n<スイッチ>\n  -             スイッチの読み取りを止める\n  -?            ヘルプを表示\n  -@[+]         ファイルリストを無効 [有効]\n  -ac           圧縮または展開のあとアーカイブ属性を消す\n  -ad[1,2]      展開先に書庫名を付ける\n  -ag[format]   現在の日付で書庫名を作る\n  -ai           ファイル属性を無視\n  -ao           アーカイブ属性のあるファイルだけ追加\n  -ap<パス>     書庫内のパス\n  -as           書庫の内容を同期\n  -c-           コメントを表示しない\n  -cfg-         設定ファイルと環境変数 RAR を無視\n  -cl           名前を小文字にする\n  -cu           名前を大文字にする\n  -df           書庫作成後にファイルを削除\n  -dh           共有中のファイルを開く\n  -dr           書庫作成後にゴミ箱へ移す\n  -ds           ソリッド書庫の名前ソートを無効\n  -dw           書庫作成後にファイルを消去\n  -ed           空のディレクトリを追加しない\n  -en           書庫終端ブロックを書かない\n  -ep           名前からパスを除く\n  -ep1          名前から基準ディレクトリを除く\n  -ep2          パスを完全なパスに広げる\n  -ep3          ドライブ名を含む完全なパスに広げる\n  -ep4<パス>    名前からパス接頭辞を除く\n  -f            既存ファイルだけ更新\n  -hp[password] データとヘッダを暗号化\n  -ht[b|c]      ハッシュの種類 [BLAKE2sp|CRC32]\n  -id[c,d,n,p,q] メッセージを出さない\n  -ieml[.][addr] 完成した書庫のメール作成を開く\n  -ierr         すべてのメッセージを標準エラーへ\n  -ilog[name]   エラーをファイルに記録\n  -inul         すべてのメッセージを出さない\n  -ioff[n]      終了後に電源操作 (1 停止, 2 休止, 3 スリープ, 4 再起動)\n  -isnd         音を鳴らす\n  -iver         バージョン番号を表示\n  -k            書庫をロック\n  -kb           壊れた展開ファイルを残す\n  -log[=name]   名前をログに書く\n  -m<0..5>      圧縮レベル (0 無圧縮 ... 3 標準 ... 5 最大)\n  -ma[4|5]      書庫形式の版 (5 のみ)\n  -mc<par>      詳細な圧縮パラメータ\n  -md<n>[k,m,g] 辞書サイズ\n  -ms[ext;ext]  格納するファイルの種類\n  -mt<threads>  スレッド数\n  -n<file>      追加の包含フィルタ\n  -n@           包含マスクを標準入力から読む\n  -n@<list>     包含マスクをリストファイルから読む\n  -o[+|-]       上書きモード\n  -oc           NTFS 圧縮属性を付ける\n  -oh           ハードリンクをリンクとして保存\n  -ol           シンボリックリンクをリンクとして扱う\n  -oni          互換性のないかもしれない名前を許す\n  -op<パス>     展開先のパス\n  -or           ファイルを自動で改名\n  -ow           所有者とグループを保存または復元\n  -p[password]  パスワード (空の -p は端末で尋ねる)\n  -qo[-|+]      クイックオープン情報\n  -r            サブディレクトリを再帰\n  -r-           再帰を無効\n  -r0           ワイルドカード名だけ再帰\n  -ri<p>[:<s>]  優先度 (0..15) と休止ミリ秒\n  -rr[N]        リカバリレコードを追加\n  -rv[N]        リカバリボリュームを作成\n  -s[<N>,v[-],e] ソリッド書庫を作る\n  -s-           ソリッドを無効\n  -sc<chr>[obj] 文字集合 (u, a, o) と対象 (f, l, c)\n  -sfx[name]    SFX 書庫を作る\n  -si[name]     標準入力からデータを読む\n  -sl<size>     指定より小さいファイル\n  -sm<size>     指定より大きいファイル\n  -t            書庫作成後にテスト\n  -ta<date>     更新日時が <日付> より後 YYYYMMDDHHMMSS\n  -tb<date>     更新日時が <日付> より前 YYYYMMDDHHMMSS\n  -tk           元の書庫の時刻を保つ\n  -tl           書庫の時刻を最新ファイルに合わせる\n  -tn<time>     指定より新しいファイル\n  -to<time>     指定より古いファイル\n  -ts[m,c,a]    時刻を保存または復元 (更新, 作成, アクセス)\n  -u            ファイルを更新\n  -v<size>[k,b] ボリュームサイズ=<サイズ>*1000 [*1024, *1]\n  -vd           受け付けるが無視する。ディスクは消去しない\n  -ver[n]       ファイルの版管理\n  -vn           古い形式のボリューム名\n  -vp           各ボリュームの前で一時停止\n  -w<パス>      作業ディレクトリ\n  -x<file>      指定したファイルを除外\n  -x@           除外名を標準入力から読む\n  -x@<list>     リストにあるファイルを除外\n  -y            すべての問い合わせに「はい」\n  -z[file]      ファイルから書庫コメントを読む\n\n<unrar-free の長いオプション>\n  --extract           ファイルを展開 (x と同じ)\n  --extract-no-paths  パスなしで展開 (e と同じ)\n  --extract-newer     新しいファイルだけ展開\n  --list              一覧 (l と同じ)\n  --print             標準出力へ (p と同じ)\n  --force             既存ファイルを上書き\n  --password <pwd>    パスワード\n  --verbose           詳しい一覧\n  --version           バージョンを表示\n  --help              ヘルプを表示
+status.ok	OK
+status.all_ok	すべて正常
+status.done	完了
+host.windows	Windows
+host.unix	Unix
+err.generic	エラー: {0}
+err.with_path	エラー: {0} ({1})
+err.locked_modify	エラー: 書庫はロックされており変更できません
+err.locked	エラー: 書庫はロックされています
+err.no_archive	エラー: 書庫名が指定されていません
+err.unknown_cmd	不明なコマンド: {0}
+err.open_file	ファイルを開けません: {0}
+err.create_file	ファイルを作成できません: {0}
+err.create_comment	コメントファイルを作成できません: {0}
+err.save	保存エラー: {0}
+err.cw_needs_file	エラー: cw にはコメントファイル名が必要です
+err.rn_pairs	エラー: rn には <元> <先> の組が必要です
+err.extract	展開エラー {0}: {1}
+err.test	テスト失敗 {0}: {1}
+err.total	エラー合計: {0}
+err.repair	修復失敗: 有効な RAR 5.0 レコードがありません
+err.ma4	エラー: RAR 4.x (-ma4) は未対応です。-ma5 を使ってください
+err.trash	{0} をゴミ箱に移動できません
+err.poweroff	コンピューターを電源オフできません
+err.rev	欠落したボリュームを復元できません
+err.rev_write	リカバリボリュームを作成できません
+err.no_files	処理するファイルがありません
+list.archive	書庫: {0}
+list.details	詳細: RAR 5
+list.solid	, ソリッド
+list.recovery	, リカバリレコード
+list.locked	, ロック
+list.enc_hdr	, ヘッダ暗号化
+list.sfx	, SFX
+list.volume	, ボリューム
+list.name	        名前: {0}
+list.type	        種類: {0}
+list.type_dir	ディレクトリ
+list.type_file	ファイル
+list.size	        サイズ: {0}
+list.packed	    圧縮後: {0}
+list.ratio	        比率: {0}%
+list.mtime	      更新日時: {0}
+list.ctime	      作成日時: {0}
+list.atime	      アクセス: {0}
+list.attr	      属性: {0}
+list.crc	       CRC32: {0}
+list.blake	    BLAKE2sp: {0}
+list.host	    ホスト OS: {0}
+list.comp	      圧縮: RAR 5.0(v50) -m{0} -md={1}
+list.solid_word	 ソリッド
+list.password	    パスワード: あり (AES-256)
+list.owner	      所有者: {0}
+list.hdr_verbose	 属性           サイズ  圧縮後   比率   日付       時刻   検査値    名前
+list.rule_verbose	----------- ---------  -------- ----- ---------- -----  --------  ----
+list.hdr_brief	 属性           サイズ  日付       時刻   名前
+list.rule_brief	----------- ---------  ---------- -----  ----
+action.testing	書庫をテストしています {0}
+action.testing_file	テスト      {0}  {1}
+action.extracting_from	{0} から展開しています
+action.creating_dir	作成        {0}  {1}
+action.extracting	展開        {0}  {1}
+action.no_files_extract	展開するファイルがありません
+action.reading_comment	{0} からコメントを読み込んでいます
+action.updating	書庫を更新しています {0}
+action.creating_sfx	SFX 書庫を作成しています {0}
+action.creating	書庫を作成しています {0}
+action.adding	追加        {0}  {1}
+action.updating_file	更新        {0}  {1}
+action.deleting	{0} を削除しています
+action.adding_rr	リカバリレコードを追加しています
+action.locking	書庫をロックしています
+action.locking_path	書庫をロックしています {0}
+action.no_files_delete	削除するファイルがありません
+action.delete_empty	空の書庫を削除しています {0}
+action.renaming	{0} を {1} に改名しています
+action.no_match	一致するファイルがありません
+action.repairing	書庫を修復しています {0}
+action.rebuilding	{0} を再構築しています
+action.found_rr	リカバリレコードが見つかりました
+action.found	見つかりました {0}
+action.repair_done	完了
+action.processing	{0} を処理しています
+action.found_in	{0} で一致:
+action.comment_prompt	コメントを入力 (Ctrl+Z または EOF で終了):
+action.adding_comment	{0} にコメントを追加  {1}
+action.adding_rr_to	{0} にリカバリレコードを追加しています
+action.writing_comment	コメントを {0} に書き込んでいます  {1}
+action.overwrite	{0} は既に存在します。上書きしますか? [Y]はい/[N]いいえ/[A]すべて/[Q]中止 
+action.password	パスワード: 
+action.pause_volume	Enter キーでボリューム {0} を続けます
+action.email	{0} のメール作成画面を開いています
+action.email_missing	{0} のメール作成プログラムがありません。書庫はディスクに残します
+action.rev_write	リカバリボリュームを作成しています {0}
+action.rev_restore	ボリューム {0} を復元しています
+action.recompress	書庫を再圧縮しています
+action.linking	リンク      {0}  {1}
+warn.vd	-vd はディスクを消去しません
+warn.ao	-ao は Windows のアーカイブ属性に従います。このシステムではすべてのファイルを含めます
+arc.cannot_open	{0} を開けません
+arc.rar4	RAR 4.x は未対応です。対応しているのは RAR 5.0 だけです
+arc.not_rar	{0} は RAR 書庫ではありません
+arc.bad_enc_hdr	暗号化ヘッダが壊れているか、パスワードが違います
+arc.trunc_enc	暗号化ヘッダが途中で切れています
+arc.bad_hdr_size	ヘッダサイズを解析できません
+arc.unexpected_end	書庫が予期せず終了しました
+arc.bad_hdr_crc	ヘッダの検査値 (CRC32) が一致しません
+arc.need_password	暗号化ヘッダにはパスワードが必要です (-p または -hp)
+arc.bad_password	パスワードが違います
+arc.data_oob	ファイルデータが書庫の末尾を超えています
+arc.missing_vol	次のボリュームが見つかりません: {0}
+arc.need_file_password	パスワードが必要です: {0}
+arc.bad_file_password	パスワードが違います: {0}
+arc.bad_stream	圧縮データが壊れています: {0}
+arc.crc	検査値エラー (CRC32 不一致): {0}
+arc.blake	検査値エラー (BLAKE2sp 不一致): {0}
+arc.write	書庫を書き込めません: {0}
+arc.write_vol	ボリュームを書き込めません: {0}
